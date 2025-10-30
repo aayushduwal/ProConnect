@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../api/api";
-
+import { saveSession } from "../utils/auth";
 const Signup = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -18,11 +18,26 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post("/api/auth/signup", formData);
+      const res = await api.post("/auth/register", formData);
+
+      // ✅ Save session immediately after signup
+      saveSession(res.data.user, res.data.token);
+
+      // ✅ Show success message
       setMessage("✅ Signup successful!");
-      console.log(res.data);
+
+      // ✅ Redirect to homepage after 1 second
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+
+      // Optional: clear form
+      setFormData({ name: "", username: "", email: "", password: "" });
+      console.log("Signup success:", res.data);
     } catch (err) {
-      setMessage("❌ Signup failed! Try again.");
+      console.error(err);
+      const msg = err.response?.data?.message || "❌ Signup failed! Try again.";
+      setMessage(msg);
     }
   };
 

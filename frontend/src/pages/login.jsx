@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../api/api";
+import { saveSession } from "../utils/auth";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -22,11 +23,21 @@ function Login() {
     setMessage("");
 
     try {
-      const res = await api.post("/api/auth/login", formData);
+      const res = await api.post("/auth/login", formData);
       console.log("Login success:", res.data);
 
-      localStorage.setItem("token", res.data.token);
+      // ✅ Save session (user + token)
+      saveSession(res.data.user, res.data.token);
+
+      // ✅ Show success message
       setMessage("✅ Login successful!");
+
+      // ✅ Redirect to homepage after 1 sec
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+
+      // Optional: clear form
       setFormData({ identifier: "", password: "" });
     } catch (err) {
       console.error(err);
