@@ -48,7 +48,8 @@ router.post("/register", async (req, res) => {
 // Login
 router.post("/login", async (req, res) => {
   try {
-    const { identifier, password } = req.body; // identifier = email or username
+    const { email, username, password } = req.body; // identifier = email or username
+    const identifier = email || username; // use whichever is provided
     if (!identifier || !password)
       return res.status(400).json({ message: "All fields are required" });
 
