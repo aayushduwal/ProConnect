@@ -48,8 +48,7 @@ router.post("/register", async (req, res) => {
 // Login
 router.post("/login", async (req, res) => {
   try {
-    const { email, username, password } = req.body; // identifier = email or username
-    const identifier = email || username; // use whichever is provided
+    const { identifier, password } = req.body; // frontend sends identifier
     if (!identifier || !password)
       return res.status(400).json({ message: "All fields are required" });
 
@@ -63,6 +62,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+
     res.json({
       user: {
         id: user._id,
