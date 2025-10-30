@@ -25,3 +25,8 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅Server running on http://localhost:${PORT}`);
 });
+
+// Simple test route
+app.get('/api/test', (req, res) => {
+  res.json({ message: "Backend is live!" });
+});
