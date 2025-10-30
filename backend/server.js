@@ -1,9 +1,9 @@
 require("dotenv").config();
+const User = require("./models/User");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const authRoutes = require("./routes/auth");
-const User = require("./models/User");
 
 const app = express();
 app.use(cors());
@@ -33,10 +33,10 @@ app.listen(PORT, () => {
 // });
 
 // MongoDB test route
-app.get('/api/db-test', async (req, res) => {
+app.get("/api/db-test", async (req, res) => {
   try {
     // Replace 'User' with one of your actual Mongoose models
-    const users = await User.find(); 
+    const users = await User.find();
     res.json({ message: "MongoDB connected!", users });
   } catch (err) {
     res.status(500).json({ error: err.message });
