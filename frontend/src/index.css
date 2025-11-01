@@ -58,6 +58,28 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+/* ✅ Custom checkbox style (white box with black tick) */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #d1d5db; /* Tailwind border-gray-300 */
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+}
+
+input[type="checkbox"]:checked::after {
+  content: "✔";
+  color: black;
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  font-size: 14px;
+}
 
 @media (prefers-color-scheme: light) {
   :root {
