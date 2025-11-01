@@ -1,8 +1,11 @@
 import axios from "axios";
 
+// use Render URL in production, localhost for dev
+const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
-  // baseURL: "https://proconnect-backend-anq5.onrender.com", // backend base URL
+  baseURL,
+  headers: { "Content-Type": "application/json" },
 });
 
 // Example: Register user
