@@ -90,3 +90,6 @@ build/Release
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# === Old Frontend Backup ===
+frontend_old/
