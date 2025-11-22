@@ -7,7 +7,15 @@ const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000", // local frontend
+      "https://proconnectapp.vercel.app", // live frontend
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
