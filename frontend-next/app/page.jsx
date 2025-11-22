@@ -9,7 +9,7 @@ export default function Landing() {
 
   const checkUsername = () => {
     if (!username) return setAvailable(null);
-    setAvailable(username !== "aayushduwal"); 
+    setAvailable(username !== "aayushduwal");
   };
 
   return (
@@ -42,7 +42,7 @@ export default function Landing() {
               <div className="flex items-center gap-2 bg-white px-3 flex-shrink-0">
                 {/* Logo image */}
                 <Image
-                  src="/assets/logo.png" // ✅ fixed path
+                  src="/assets/logo.png"
                   alt="ProConnect Logo"
                   width={20}
                   height={20}
