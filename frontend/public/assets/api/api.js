@@ -1,15 +1,15 @@
 import axios from "axios";
 
-// use Render URL in production, localhost for dev
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-console.log("🧩 API base URL:", baseURL); // <--- Add this line
+// Use NEXT_PUBLIC_ environment variable in Next.js
+const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+console.log("🧩 API base URL:", baseURL);
 
 const API = axios.create({
   baseURL,
   headers: { "Content-Type": "application/json" },
 });
 
-// Example: Register user
+// Register user
 export const registerUser = async (formData) => {
   try {
     const response = await API.post("/auth/register", formData);
@@ -20,7 +20,7 @@ export const registerUser = async (formData) => {
   }
 };
 
-// Example: Login user
+// Login user
 export const loginUser = async (formData) => {
   try {
     const response = await API.post("/auth/login", formData);
