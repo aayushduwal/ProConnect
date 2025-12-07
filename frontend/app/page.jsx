@@ -1,103 +1,165 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../components/Header";
+
 
 export default function Landing() {
   const [username, setUsername] = useState("");
   const [available, setAvailable] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    setMounted(true);
+    // Fetch recent users
+    fetch("http://localhost:5000/api/users/recent")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setUsers(data);
+        }
+      })
+      .catch((err) => console.error("Failed to load users", err));
+  }, []);
 
   const checkUsername = () => {
     if (!username) return setAvailable(null);
-    setAvailable(username !== "aayushduwal");
+    if (username.length < 3) return setAvailable(false);
+
+    fetch(`http://localhost:5000/api/users/check/${username}`)
+      .then(res => res.json())
+      .then(data => setAvailable(data.available))
+      .catch(err => console.error(err));
   };
 
+  // Create a display list: Real users + placeholders to fill the grid up to 30
+  const displayUsers = [...users, ...Array.from({ length: Math.max(0, 30 - users.length) })].slice(0, 30);
+
   return (
-    <div className="min-h-screen w-full bg-white text-gray-800 flex flex-col items-center">
+    <div className="min-h-screen w-full bg-[#f9fafb] text-gray-900 flex flex-col items-center">
       {/* Header */}
       <Header />
 
+      {/* Background Pattern */}
+      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}
+      ></div>
+
       {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center text-center px-3 py-10 bg-white w-full">
-        <div className="max-w-[400px] mx-auto w-full">
-          {/* Heading and description */}
-          <div className="max-w-[530px] mx-auto w-full">
-            <h1 className="text-2xl md:text-3xl leading-tight">
-              <span className="font-serif italic">
-                The Professional Network
-              </span>
-              <br />
-              <span className="font-serif">for builders to show & tell!</span>
-            </h1>
-            <p className="text-gray-500 mt-3 text-sm">
-              Showcase your work, launch projects, find jobs, and connect with
-              incredible people.
-            </p>
-          </div>
+      <section className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-20 w-full max-w-[600px]">
+        {/* Animated Badge (optional) */}
+        <div className="mb-6 inline-flex items-center rounded-full border border-green-200 bg-green-50 px-3 py-1 text-sm text-green-800 animate-fade-in-up">
+          <span className="flex h-2 w-2 rounded-full bg-green-600 mr-2"></span>
+          Join the fastest growing network
+        </div>
 
-          {/* Username Input */}
-          <div className="max-w-[400px] mx-auto w-full mt-5">
-            <div className="flex items-center border border-gray-200 rounded-lg shadow-sm overflow-hidden w-full bg-white focus-within:ring-2 focus-within:ring-green-500">
-              {/* Left Icon */}
-              <div className="flex items-center gap-2 bg-white px-3 flex-shrink-0">
-                {/* Logo image */}
-                <Image
-                  src="/assets/logo.png"
-                  alt="ProConnect Logo"
-                  width={20}
-                  height={20}
-                  className="rounded-full object-cover"
-                />
-                <span className="text-sm text-black font-medium">
-                  proconnect.io/
-                </span>
-              </div>
+        {/* Heading */}
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-[1.15] mb-4 text-gray-900">
+          <span className="font-serif italic text-gray-700">The Professional Network</span>
+          <br />
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900">
+            for builders to show & tell!
+          </span>
+        </h1>
 
-              {/* Input */}
-              <input
-                type="text"
-                placeholder="username"
-                className="flex-1 outline-none px-2 py-1.5 text-sm bg-white text-black min-w-0"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+        <p className="text-gray-500 mt-4 text-lg max-w-md mx-auto leading-relaxed">
+          Showcase your work, launch projects, find jobs, and connect with
+          incredible people in tech and design.
+        </p>
+
+        {/* Username Input Card */}
+        <div className="w-full max-w-[440px] mt-10 p-1.5 bg-white rounded-xl border border-gray-200 shadow-xl shadow-gray-200/50 transition-all focus-within:ring-4 focus-within:ring-green-500/10 focus-within:border-green-500/50">
+          <div className="flex items-center w-full">
+            {/* Prefix */}
+            <div className="flex items-center gap-2 px-3 py-2 bg-gray-50/50 rounded-lg mr-2 border border-gray-100">
+              <Image
+                src="/assets/logo.png"
+                alt="Logo"
+                width={18}
+                height={18}
+                className="rounded-full"
               />
-
-              {/* Button */}
-              <button
-                onClick={checkUsername}
-                className="bg-gray-400 text-white px-3 text-sm rounded-r-lg"
-              >
-                →
-              </button>
+              <span className="text-sm font-semibold text-gray-600 tracking-tight">
+                proconnect.io/
+              </span>
             </div>
 
-            {/* Username availability messages */}
-            {available === true && (
-              <p className="text-green-600 mt-2 text-xs">
-                It's available... this username is available! 😃
-              </p>
-            )}
-            {available === false && (
-              <p className="text-red-500 mt-2 text-xs">
-                This username is already taken. 😐
-              </p>
-            )}
+            {/* Input */}
+            <input
+              type="text"
+              placeholder="username"
+              className="flex-1 outline-none text-base bg-transparent text-gray-900 placeholder-gray-400 font-medium"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase())}
+              onKeyDown={(e) => e.key === 'Enter' && checkUsername()}
+            />
 
-            <p className="text-gray-400 mt-2 text-xs">
+            {/* Action Button */}
+            <button
+              onClick={checkUsername}
+              className="group flex items-center justify-center ml-2 h-9 w-9 bg-gray-900 hover:bg-black text-white rounded-lg transition-all active:scale-95"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-0.5 transition-transform">
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Feedback Messages */}
+        <div className="h-6 mt-3">
+          {available === true && (
+            <p className="text-green-600 text-sm font-medium animate-in fade-in slide-in-from-top-1 bg-green-50 px-3 py-1 rounded-full inline-block border border-green-100">
+              🎉 <span className="font-bold">{username}</span> is available! Claim it now.
+            </p>
+          )}
+          {available === false && (
+            <p className="text-red-500 text-sm font-medium animate-in fade-in slide-in-from-top-1 bg-red-50 px-3 py-1 rounded-full inline-block border border-red-100">
+              😕 <span className="font-bold">{username}</span> is taken. Try another?
+            </p>
+          )}
+          {available === null && !username && (
+            <p className="text-gray-400 text-xs font-medium">
               Claim your username before it's too late!
             </p>
-          </div>
+          )}
+        </div>
 
-          {/* Avatar grid */}
-          <div className="mt-8 grid grid-cols-8 gap-2 justify-center">
-            {Array.from({ length: 32 }).map((_, i) => (
-              <div key={i} className="w-8 h-8 bg-gray-200 rounded-full"></div>
-            ))}
-          </div>
-
-          <p className="text-gray-500 mt-3 text-xs">
-            162,105+ peers and counting...
+        {/* Community Grid */}
+        <div className="mt-16 w-full">
+          <p className="text-sm font-semibold text-gray-500 mb-6 uppercase tracking-wider text-center">
+            Join 162,105+ peers
           </p>
+
+          {/* Avatar Grid: Real Users + Placeholders */}
+          <div className="flex flex-wrap justify-center max-w-4xl mx-auto gap-3 sm:gap-4">
+            {mounted && displayUsers.map((user, i) => {
+              // Decide image: Real user avatar > Google placeholder > Pravatar fallback
+              // For placeholder objects (where user is undefined/null), use Pravatar
+              const imgSrc = user?.avatarUrl || `https://i.pravatar.cc/150?img=${(i % 50) + 10}`;
+
+              return (
+                <div
+                  key={i}
+                  className="relative group w-10 h-10 sm:w-12 sm:h-12 cursor-pointer"
+                  title={user?.name || `User ${i + 1}`}
+                >
+                  <Image
+                    src={imgSrc}
+                    alt={user?.name || `User ${i + 1}`}
+                    width={48}
+                    height={48}
+                    className="rounded-full border-2 border-white shadow-md object-cover w-full h-full transition-all duration-300 ease-out
+                          group-hover:scale-[2.5] group-hover:z-50 group-hover:shadow-xl relative z-0"
+                    unoptimized // Helps with external avatar URLs sometimes
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
     </div>
