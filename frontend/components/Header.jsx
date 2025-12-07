@@ -49,7 +49,7 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-500">
-          <Link href="#scroll" className="hover:text-gray-900 transition-colors">
+          <Link href="/scroll" className="hover:text-gray-900 transition-colors">
             Scroll
           </Link>
           <Link href="#jobs" className="hover:text-gray-900 transition-colors">
