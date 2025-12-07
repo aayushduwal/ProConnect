@@ -182,9 +182,8 @@ export default function CompleteProfile() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium ${
-              loading ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            className={`w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium ${loading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
           >
             {loading ? "Saving..." : "Create Profile →"}
           </button>

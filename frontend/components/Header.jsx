@@ -15,7 +15,7 @@ export default function Header() {
     if (typeof window === "undefined") return;
 
     const savedUser = getUser();
-    setUser(savedUser || null); // always set the user if exists
+    setUser(savedUser || null);
   }, []);
 
   // Close profile dropdown when clicking outside
@@ -30,147 +30,144 @@ export default function Header() {
   }, []);
 
   return (
-    <nav className="w-full bg-white border-b border-gray-200/60 sticky top-0 z-50">
-      <div className="max-w-[540px] mx-auto flex justify-between items-center px-3 py-3">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/assets/logo.png"
-            alt="ProConnect Logo"
-            width={24}
-            height={24}
-            className="rounded-lg object-cover"
-          />
-          <span className="text-black font-bold text-lg">ProConnect</span>
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
+      <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-4">
+        {/* Logo Section */}
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="relative w-8 h-8 overflow-hidden rounded-lg shadow-sm group-hover:shadow-md transition-shadow">
+            <Image
+              src="/assets/logo.png"
+              alt="ProConnect"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <span className="text-gray-900 font-bold text-xl tracking-tight leading-none font-sans">
+            ProConnect
+          </span>
         </Link>
 
-        {/* Desktop links */}
-        <div className="hidden sm:flex items-center gap-4 text-xs">
-          <a href="#scroll" className="text-black hover:text-black">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-500">
+          <Link href="#scroll" className="hover:text-gray-900 transition-colors">
             Scroll
-          </a>
-          <a href="#jobs" className="text-black hover:text-black">
+          </Link>
+          <Link href="#jobs" className="hover:text-gray-900 transition-colors">
             Jobs
-          </a>
-          <a href="#launchpad" className="text-black hover:text-black">
+          </Link>
+          <Link href="#launchpad" className="hover:text-gray-900 transition-colors">
             Launchpad
-          </a>
+          </Link>
         </div>
 
-        {/* Mobile menu button */}
-        <div className="sm:hidden flex items-center gap-2">
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-4">
+          {/* Mobile Menu Toggle */}
           <button
-            className="p-2 border rounded-md"
+            className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
             onClick={() => setOpenMobileMenu(!openMobileMenu)}
           >
-            {/* Hamburger Icon */}
-            <div className="w-5 h-0.5 bg-black mb-1"></div>
-            <div className="w-5 h-0.5 bg-black mb-1"></div>
-            <div className="w-5 h-0.5 bg-black"></div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
-        </div>
 
-        {/* Profile */}
-        {user && (
-          <div className="relative ml-3" ref={dropdownRef}>
-            <button onClick={() => setOpenDropdown(!openDropdown)}>
-              {user.profilePic ? (
-                <Image
-                  src={user.profilePic}
-                  width={32}
-                  height={32}
-                  alt="Profile"
-                  className="rounded-full border cursor-pointer"
-                />
-              ) : (
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center cursor-pointer text-gray-700 font-semibold">
-                  {user.name?.[0] || "U"}
+          {/* User Profile / Auth Buttons */}
+          {user ? (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setOpenDropdown(!openDropdown)}
+                className="flex items-center gap-2 focus:outline-none"
+              >
+                {user.profilePic ? (
+                  <Image
+                    src={user.profilePic}
+                    width={36}
+                    height={36}
+                    alt="Profile"
+                    className="rounded-full border border-gray-200 shadow-sm hover:shadow-md transition-shadow object-cover"
+                  />
+                ) : (
+                  <div className="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+                    {user.name?.[0]?.toUpperCase() || "U"}
+                  </div>
+                )}
+              </button>
+
+              {/* Enhanced Dropdown */}
+              {openDropdown && (
+                <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right ring-1 ring-black/5">
+                  <div className="px-4 py-3 border-b border-gray-50 bg-gray-50/50">
+                    <p className="text-sm font-semibold text-gray-900 truncate">
+                      {user.name || "User"}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate mt-0.5">
+                      {user.email || "user@example.com"}
+                    </p>
+                  </div>
+
+                  <div className="p-1">
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      onClick={() => setOpenDropdown(false)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                      View Profile
+                    </Link>
+                    <Link
+                      href="/settings"
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      onClick={() => setOpenDropdown(false)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+                      Settings
+                    </Link>
+                    <div className="h-px bg-gray-100 my-1 mx-2"></div>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setUser(null);
+                        setOpenDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
               )}
-            </button>
-
-            {openDropdown && (
-              <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-lg py-2 z-50">
-                <span className="block px-4 py-2 text-gray-900 font-semibold border-b">
-                  {user.name || "User"}
-                </span>
-                <Link
-                  href="/profile"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  View Profile
-                </Link>
-                <button
-                  onClick={() => {
-                    logout(); // remove user from storage
-                    setUser(null); // immediately update Header state
-                    setOpenDropdown(false); // close the dropdown
-                  }}
-                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Login / Signup for logged-out users */}
-        {!user && (
-          <div className="hidden sm:flex items-center gap-2">
-            <Link
-              href="/login"
-              className="px-2 py-1 border border-gray-300 rounded-lg text-black"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/signup"
-              className="px-2 py-1 bg-green-600 text-white rounded-lg"
-            >
-              Create Profile
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {/* Mobile menu links */}
-      {openMobileMenu && (
-        <div className="sm:hidden bg-white border-t border-gray-200">
-          <a
-            href="#scroll"
-            className="block px-4 py-2 text-black hover:bg-gray-100"
-          >
-            Scroll
-          </a>
-          <a
-            href="#jobs"
-            className="block px-4 py-2 text-black hover:bg-gray-100"
-          >
-            Jobs
-          </a>
-          <a
-            href="#launchpad"
-            className="block px-4 py-2 text-black hover:bg-gray-100"
-          >
-            Launchpad
-          </a>
-
-          {!user && (
-            <>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
               <Link
                 href="/login"
-                className="block px-4 py-2 text-black hover:bg-gray-100"
+                className="hidden sm:inline-block text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
               >
                 Log in
               </Link>
               <Link
                 href="/signup"
-                className="block px-4 py-2 text-green-600 hover:bg-gray-100"
+                className="text-sm font-medium bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-black transition-all shadow-sm hover:shadow-md active:scale-95"
               >
-                Create Profile
+                Sign Up
               </Link>
-            </>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {openMobileMenu && (
+        <div className="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-md absolute w-full shadow-lg p-4 space-y-4 animate-in slide-in-from-top-2">
+          <Link href="#scroll" className="block text-gray-600 hover:text-gray-900 py-2">Scroll</Link>
+          <Link href="#jobs" className="block text-gray-600 hover:text-gray-900 py-2">Jobs</Link>
+          <Link href="#launchpad" className="block text-gray-600 hover:text-gray-900 py-2">Launchpad</Link>
+          <hr className="border-gray-100" />
+          {!user && (
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <Link href="/login" className="text-center py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-700">Log In</Link>
+              <Link href="/signup" className="text-center py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium">Sign Up</Link>
+            </div>
           )}
         </div>
       )}
