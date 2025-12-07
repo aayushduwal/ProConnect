@@ -94,3 +94,12 @@ vite.config.ts.timestamp-*
 # === Old Frontend Backup ===
 frontend_old/
 frontend_old.zip
+
+# === Backend Secrets (VERY IMPORTANT) ===
+backend/serviceAccountKey.json
+backend/config/firebaseAdmin.js
+backend/test_admin.js
+
+# Backend env
+backend/.env
+frontend/.env
