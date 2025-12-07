@@ -6,6 +6,8 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import Header from "../../components/Header";
 import api from "../../lib/api";
 import { saveSession } from "../../utils/auth";
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../../utils/firebase";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -22,8 +24,11 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // only email + password
-      const res = await api.post("/auth/register", formData);
+      // add a temporary username to avoid null conflict
+      const res = await api.post("/auth/register", {
+        ...formData,
+        username: `user_${Date.now()}`, // temporary unique username
+      });
 
       // save token and user in localStorage
       saveSession(res.data.user, res.data.token);
@@ -36,6 +41,29 @@ export default function Signup() {
     } catch (err) {
       console.error(err);
       setMessage(err.response?.data?.message || "❌ Signup failed! Try again.");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+
+      const res = await api.post("/auth/google", { token: idToken });
+
+      saveSession(res.data.user, res.data.token);
+      setMessage("✅ Google Signup successful!");
+      setTimeout(() => {
+        window.location.href = "/completeprofile";
+      }, 1000); // Redirect to complete profile if new user? 
+      // Actually backend handles logic, if user exists it returns user. 
+      // If we want consistency, we can redirect to home ("/") or check if profile is complete. 
+      // For now I will match the login behavior but maybe direct to completeprofile if it's a signup flow?
+      // Creating a user usually leads to complete profile. I'll stick to completeprofile for signup page flow.
+    } catch (err) {
+      console.error("Google Signup Error:", err);
+      setMessage("❌ Google Signup failed. Please try again.");
     }
   };
 
@@ -54,6 +82,7 @@ export default function Signup() {
         <div className="w-full max-w-sm bg-white border border-gray-200 rounded-2xl shadow-md p-8 space-y-3">
           <button
             type="button"
+            onClick={handleGoogleLogin}
             className="w-full flex items-center justify-center border border-gray-300 rounded-2xl py-2 bg-white hover:bg-gray-100 transition"
           >
             <img

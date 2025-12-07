@@ -12,7 +12,10 @@ export default function Header() {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    setUser(getUser());
+    if (typeof window === "undefined") return;
+
+    const savedUser = getUser();
+    setUser(savedUser || null); // always set the user if exists
   }, []);
 
   // Close profile dropdown when clicking outside
@@ -98,7 +101,11 @@ export default function Header() {
                   View Profile
                 </Link>
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout(); // remove user from storage
+                    setUser(null); // immediately update Header state
+                    setOpenDropdown(false); // close the dropdown
+                  }}
                   className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
                 >
                   Logout

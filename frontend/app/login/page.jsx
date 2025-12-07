@@ -6,6 +6,8 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import Header from "../../components/Header";
 import api from "../../lib/api";
 import { saveSession } from "../../utils/auth";
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../../utils/firebase";
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -40,6 +42,23 @@ export default function Login() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+
+      const res = await api.post("/auth/google", { token: idToken });
+
+      saveSession(res.data.user, res.data.token);
+      setMessage("✅ Google Login successful!");
+      setTimeout(() => (window.location.href = "/"), 1000);
+    } catch (err) {
+      console.error("Google Login Error:", err);
+      setMessage("❌ Google Login failed. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-900">
       {/* Header/Navbar */}
@@ -62,6 +81,7 @@ export default function Login() {
           {/* Google Button */}
           <button
             type="button"
+            onClick={handleGoogleLogin}
             className="w-full flex items-center justify-center border border-gray-300 rounded-2xl py-2 bg-white hover:bg-gray-100 transition"
           >
             <Image
@@ -143,9 +163,8 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full bg-gray-900 hover:bg-black text-white font-semibold py-2 rounded-2xl transition ${
-                loading ? "opacity-70 cursor-not-allowed" : ""
-              }`}
+              className={`w-full bg-gray-900 hover:bg-black text-white font-semibold py-2 rounded-2xl transition ${loading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
             >
               {loading ? "Logging in..." : "Login →"}
             </button>
