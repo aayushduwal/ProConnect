@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
     },
-    password: { type: String, required: true },
+    password: { type: String },
     bio: { type: String, default: "" },
     avatarUrl: { type: String, default: "" },
     linkedinUrl: { type: String, default: "" },
