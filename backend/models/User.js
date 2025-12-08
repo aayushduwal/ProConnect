@@ -24,6 +24,8 @@ const userSchema = new mongoose.Schema(
     avatarUrl: { type: String, default: "" },
     linkedinUrl: { type: String, default: "" },
     verified: { type: Boolean, default: false },
+    skills: [{ type: String, trim: true }],
+    interests: [{ type: String, trim: true }],
   },
   { timestamps: true }
 );

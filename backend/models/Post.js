@@ -13,9 +13,32 @@ const postSchema = new mongoose.Schema(
             trim: true,
             maxLength: 2000,
         },
+        title: {
+            type: String,
+            trim: true,
+            maxLength: 100,
+        },
         image: {
-            type: String, // URL to image if present
+            type: String, // Legacy support
             default: "",
+        },
+        mediaType: {
+            type: String, // 'image', 'video'
+            enum: ['image', 'video', 'none'],
+            default: 'none'
+        },
+        mediaUrl: {
+            type: String,
+            default: ""
+        },
+        skills: [{ type: String, trim: true }],
+        technologies: [{ type: String, trim: true }],
+        category: { type: String, trim: true, default: "General" },
+        views: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        saves: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        poll: {
+            question: String,
+            options: [{ text: String, votes: { type: Number, default: 0 } }]
         },
         likes: [
             {

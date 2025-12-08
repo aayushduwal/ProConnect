@@ -6,7 +6,7 @@ import SidebarRight from "../../components/SidebarRight";
 export default function ScrollLayout({ children }) {
     return (
         <div className="min-h-screen bg-[#FAFAFA] font-sans">
-            <div className="max-w-[1500px] mx-auto grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[280px_1fr_320px] min-h-screen">
+            <div className="max-w-[1500px] mx-auto grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[280px_1fr_280px] min-h-screen">
 
                 {/* LEFT COLUMN */}
                 <div className="hidden md:block">
@@ -14,7 +14,7 @@ export default function ScrollLayout({ children }) {
                 </div>
 
                 {/* MIDDLE COLUMN */}
-                <div className="flex-1 min-w-0 border-r border-gray-200">
+                <div className="flex-1 min-w-0">
                     {children}
                 </div>
 
