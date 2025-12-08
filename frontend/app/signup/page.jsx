@@ -1,12 +1,12 @@
 "use client";
 
+import { signInWithPopup } from "firebase/auth";
 import Link from "next/link";
 import { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import Header from "../../components/Header";
 import api from "../../lib/api";
 import { saveSession } from "../../utils/auth";
-import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../utils/firebase";
 
 export default function Signup() {
@@ -55,10 +55,10 @@ export default function Signup() {
       saveSession(res.data.user, res.data.token);
       setMessage("✅ Google Signup successful!");
       setTimeout(() => {
-        window.location.href = "/completeprofile";
-      }, 1000); // Redirect to complete profile if new user? 
-      // Actually backend handles logic, if user exists it returns user. 
-      // If we want consistency, we can redirect to home ("/") or check if profile is complete. 
+        window.location.href = "/complete-profile";
+      }, 1000); // Redirect to complete profile if new user?
+      // Actually backend handles logic, if user exists it returns user.
+      // If we want consistency, we can redirect to home ("/") or check if profile is complete.
       // For now I will match the login behavior but maybe direct to completeprofile if it's a signup flow?
       // Creating a user usually leads to complete profile. I'll stick to completeprofile for signup page flow.
     } catch (err) {
