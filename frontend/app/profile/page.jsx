@@ -111,7 +111,7 @@ export default function ProfilePage() {
             </button>
 
             <button
-              onClick={handleLogout}
+              onClick={hcndleLogout}
               className="w-full bg-gray-200 text-gray-700 py-2 rounded-2xl hover:bg-gray-300 transition font-medium"
             >
               Logout
