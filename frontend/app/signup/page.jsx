@@ -36,7 +36,7 @@ export default function Signup() {
 
       // redirect to complete profile page
       setTimeout(() => {
-        window.location.href = "/completeprofile";
+        window.location.href = "/complete-profile";
       }, 1000);
     } catch (err) {
       console.error(err);
