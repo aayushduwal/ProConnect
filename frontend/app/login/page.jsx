@@ -1,4 +1,5 @@
 "use client";
+import { signInWithPopup } from "firebase/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -6,7 +7,6 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import Header from "../../components/Header";
 import api from "../../lib/api";
 import { saveSession } from "../../utils/auth";
-import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../utils/firebase";
 
 export default function Login() {
@@ -163,8 +163,9 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full bg-gray-900 hover:bg-black text-white font-semibold py-2 rounded-2xl transition ${loading ? "opacity-70 cursor-not-allowed" : ""
-                }`}
+              className={`w-full bg-gray-900 hover:bg-black text-white font-semibold py-2 rounded-2xl transition ${
+                loading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             >
               {loading ? "Logging in..." : "Login →"}
             </button>
