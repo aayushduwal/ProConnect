@@ -24,6 +24,12 @@ export default function ScrollPage() {
     setUser(currentUser);
     setToken(currentToken);
     fetchPosts();
+
+    // Listen for "Start Streak" event from Sidebar
+    const handleOpenModal = () => setIsModalOpen(true);
+    window.addEventListener("openCreatePostModal", handleOpenModal);
+
+    return () => window.removeEventListener("openCreatePostModal", handleOpenModal);
   }, []);
 
   const fetchPosts = async () => {

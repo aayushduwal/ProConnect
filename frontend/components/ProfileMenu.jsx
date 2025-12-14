@@ -38,7 +38,7 @@ export default function ProfileMenu({ user, onClose }) {
     ];
 
     return (
-        <div className="absolute right-0 top-14 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden font-sans animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+        <div className="w-full bg-white shadow-xl border-b border-gray-200 z-50 overflow-hidden font-sans animate-in fade-in slide-in-from-top-1 duration-200">
             {/* Header */}
             <div className="flex justify-between items-center p-4 border-b border-gray-50">
                 <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">

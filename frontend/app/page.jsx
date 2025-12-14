@@ -162,9 +162,12 @@ export default function Landing() {
       </section>
       <section className="relative z-10 w-full">
         <DomeGallery
-          images={users.map(user => ({
-            src: user.profilePicture || user.avatarUrl || `https://ui-avatars.com/api/?name=${user.name}`,
-            alt: user.name || user.username || 'User'
+          images={users.map((user) => ({
+            src:
+              user.profilePicture ||
+              user.avatarUrl ||
+              `https://ui-avatars.com/api/?name=${user.name}`,
+            alt: user.name || user.username || "User",
           }))}
         />
       </section>
@@ -189,34 +192,123 @@ export default function Landing() {
                   ProConnect
                 </h2>
                 <p className="mt-4 text-gray-500 text-sm leading-relaxed max-w-xs">
-                  The professional network for builders to show & tell. Connect with the most incredible people in tech.
+                  The professional network for builders to show & tell. Connect
+                  with the most incredible people in tech.
                 </p>
               </div>
             </div>
 
             {/* Main Pages */}
             <div className="pt-2">
-              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-6">Platform</h3>
+              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-6">
+                Platform
+              </h3>
               <ul className="space-y-3.5">
-                <li><a href="/scroll" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">Scroll</a></li>
-                <li><a href="/jobs" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">Startup Jobs</a></li>
-                <li><a href="/launchpad" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">Launchpad</a></li>
-                <li><a href="/search" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">Search People</a></li>
-                <li><a href="/blog" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">Blog</a></li>
-                <li><a href="/challenges" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">Challenges</a></li>
+                <li>
+                  <a
+                    href="/scroll"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    Scroll
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/jobs"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    Startup Jobs
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/launchpad"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    Launchpad
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/search"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    Search People
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/blog"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/challenges"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    Challenges
+                  </a>
+                </li>
               </ul>
             </div>
 
             {/* Tools */}
             <div className="pt-2">
-              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-6">Tools</h3>
+              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-6">
+                Tools
+              </h3>
               <ul className="space-y-3.5">
-                <li><a href="/job-hunt-ai" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">Job Hunt AI</a></li>
-                <li><a href="/github-recap" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">GitHub Recap</a></li>
-                <li><a href="/layoffs-tracker" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">Layoffs Tracker</a></li>
-                <li><a href="/readme-badge" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">README Badge</a></li>
-                <li><a href="/internship" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">Internships</a></li>
-                <li><a href="/resume-builder" className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium">Resume Builder</a></li>
+                <li>
+                  <a
+                    href="/job-hunt-ai"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    Job Hunt AI
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/github-recap"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    GitHub Recap
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/layoffs-tracker"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    Layoffs Tracker
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/readme-badge"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    README Badge
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/internship"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    Internships
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/resume-builder"
+                    className="text-[15px] text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    Resume Builder
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -237,11 +329,36 @@ export default function Landing() {
 
               {/* Resources Links - Spans 2 columns to align with Platform & Tools */}
               <div className="md:col-span-2 flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px] font-medium text-gray-500 pt-1">
-                <a href="/brand-kit" className="hover:text-gray-900 transition-colors">Brand Kit</a>
-                <a href="/help" className="hover:text-gray-900 transition-colors">Help</a>
-                <a href="/privacy" className="hover:text-gray-900 transition-colors">Privacy</a>
-                <a href="/code-of-conduct" className="hover:text-gray-900 transition-colors">Code of Conduct</a>
-                <a href="/terms" className="hover:text-gray-900 transition-colors">Terms</a>
+                <a
+                  href="/brand-kit"
+                  className="hover:text-gray-900 transition-colors"
+                >
+                  Brand Kit
+                </a>
+                <a
+                  href="/help"
+                  className="hover:text-gray-900 transition-colors"
+                >
+                  Help
+                </a>
+                <a
+                  href="/privacy"
+                  className="hover:text-gray-900 transition-colors"
+                >
+                  Privacy
+                </a>
+                <a
+                  href="/code-of-conduct"
+                  className="hover:text-gray-900 transition-colors"
+                >
+                  Code of Conduct
+                </a>
+                <a
+                  href="/terms"
+                  className="hover:text-gray-900 transition-colors"
+                >
+                  Terms
+                </a>
               </div>
             </div>
           </div>

@@ -26,6 +26,8 @@ const userSchema = new mongoose.Schema(
     verified: { type: Boolean, default: false },
     skills: [{ type: String, trim: true }],
     interests: [{ type: String, trim: true }],
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );
