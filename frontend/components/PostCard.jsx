@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { FaRegThumbsUp, FaRegCommentDots, FaShare } from "react-icons/fa";
+import { FaRegThumbsUp, FaRegCommentDots, FaShare, FaEllipsisH, FaTrash } from "react-icons/fa";
 import { getUser } from "../utils/auth";
 import Link from "next/link";
+
 
 export default function PostCard({ post }) {
     const user = getUser();
@@ -15,6 +16,7 @@ export default function PostCard({ post }) {
         userId ? post.likes.some(likeId => likeId.toString() === userId.toString()) : false
     );
     const [likeCount, setLikeCount] = useState(post.likes.length);
+    const [showMenu, setShowMenu] = useState(false);
 
     const handleLike = async () => {
         if (!user || !userId) return alert("Please log in to like.");
@@ -37,6 +39,29 @@ export default function PostCard({ post }) {
             setLikeCount(prev => wasLiked ? prev + 1 : prev - 1);
         }
     };
+
+    const handleDelete = async () => {
+        if (!confirm("Are you sure you want to delete this post?")) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/posts/${post._id}`, {
+                method: "DELETE",
+                headers: { "x-user-id": userId }
+            });
+
+            if (response.ok) {
+                alert("Post deleted successfully!");
+                window.location.reload(); // Refresh to update the feed
+            } else {
+                const data = await response.json();
+                alert(data.error || "Failed to delete post");
+            }
+        } catch (err) {
+            console.error("Delete failed", err);
+            alert("Failed to delete post");
+        }
+    };
+
 
     if (!post.author) return null;
 
@@ -65,9 +90,48 @@ export default function PostCard({ post }) {
                             <p className="text-xs text-gray-500 line-clamp-1">{post.author.headline || `@${post.author.username}`}</p>
                         </div>
 
-                        <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                            {new Date(post.createdAt).toLocaleDateString()}
-                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400 whitespace-nowrap">
+                                {new Date(post.createdAt).toLocaleDateString()}
+                            </span>
+
+                            {/* Three-dot menu - only show if user is the author */}
+                            {userId && post.author._id?.toString() === userId.toString() && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowMenu(!showMenu)}
+                                        className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                                        aria-label="Post options"
+                                    >
+                                        <FaEllipsisH className="text-gray-500" size={14} />
+                                    </button>
+
+                                    {showMenu && (
+                                        <>
+                                            {/* Backdrop to close menu */}
+                                            <div
+                                                className="fixed inset-0 z-10"
+                                                onClick={() => setShowMenu(false)}
+                                            />
+
+                                            {/* Dropdown menu */}
+                                            <div className="absolute right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20 min-w-[150px]">
+                                                <button
+                                                    onClick={() => {
+                                                        setShowMenu(false);
+                                                        handleDelete();
+                                                    }}
+                                                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                                                >
+                                                    <FaTrash size={12} />
+                                                    Delete Post
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

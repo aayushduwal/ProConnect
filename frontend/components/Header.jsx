@@ -77,19 +77,18 @@ export default function Header() {
                 onClick={() => setOpenDropdown(!openDropdown)}
                 className="flex items-center gap-2 focus:outline-none"
               >
-                {user.profilePic ? (
+                <div className="relative w-9 h-9 rounded-full overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                   <Image
-                    src={user.profilePic}
-                    width={36}
-                    height={36}
+                    src={
+                      user.profilePic ||
+                      user.avatarUrl ||
+                      `https://ui-avatars.com/api/?name=${user.name}`
+                    }
+                    fill
                     alt="Profile"
-                    className="rounded-full border border-gray-200 shadow-sm hover:shadow-md transition-shadow object-cover"
+                    className="object-cover"
                   />
-                ) : (
-                  <div className="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-sm">
-                    {user.name?.[0]?.toUpperCase() || "U"}
-                  </div>
-                )}
+                </div>
               </button>
 
               {/* Enhanced Dropdown */}

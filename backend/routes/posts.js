@@ -216,4 +216,24 @@ router.put("/:id/view", verifyToken, async (req, res) => {
     }
 });
 
+// DELETE a post (only by author)
+router.delete("/:id", verifyToken, async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ error: "Post not found" });
+
+        const userId = req.user._id;
+
+        // Check if the user is the author of the post
+        if (post.author.toString() !== userId.toString()) {
+            return res.status(403).json({ error: "You can only delete your own posts" });
+        }
+
+        await Post.findByIdAndDelete(req.params.id);
+        res.json({ message: "Post deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;
