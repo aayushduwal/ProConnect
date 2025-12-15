@@ -1,7 +1,61 @@
 "use client";
+import { useState, useEffect } from "react";
 import { FaFire } from "react-icons/fa";
+import { getToken } from "../utils/auth";
 
 export default function StreakMenu({ onClose }) {
+    const [streakData, setStreakData] = useState({
+        streakCount: 0,
+        longestStreak: 0,
+        lastPostDate: null
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchStreak();
+    }, []);
+
+    const fetchStreak = async () => {
+        const token = getToken();
+        if (!token) {
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:5000/api/streak", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setStreakData(data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch streak:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleStartStreak = () => {
+        window.dispatchEvent(new Event("openCreatePostModal"));
+        onClose();
+    };
+
+    const getStreakMessage = () => {
+        if (streakData.streakCount === 0) {
+            return "You haven't started a streak yet. Start posting to build your fire!";
+        } else if (streakData.streakCount === 1) {
+            return "Great start! Post again tomorrow to keep the flame alive! 🔥";
+        } else if (streakData.streakCount < 7) {
+            return `You're on fire! Keep going to reach a week-long streak! 🔥`;
+        } else if (streakData.streakCount < 30) {
+            return `Incredible dedication! You're building an unstoppable habit! 🚀`;
+        } else {
+            return `Legendary! You're a posting machine! 👑`;
+        }
+    };
+
     return (
         <div className="w-full bg-white shadow-xl border-b border-gray-200 z-50 overflow-hidden font-sans animate-in fade-in slide-in-from-top-1 duration-200">
             {/* Header */}
@@ -19,21 +73,38 @@ export default function StreakMenu({ onClose }) {
             </div>
 
             <div className="p-6 text-center">
-                <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FaFire className="text-4xl text-orange-500" />
-                </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-1">0 Days</h2>
-                <p className="text-gray-500 text-sm mb-6">You haven't started a streak yet. Start posting to build your fire!</p>
+                {loading ? (
+                    <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+                    </div>
+                ) : (
+                    <>
+                        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${streakData.streakCount > 0 ? 'bg-orange-100' : 'bg-orange-50'
+                            }`}>
+                            <FaFire className={`text-4xl ${streakData.streakCount > 0 ? 'text-orange-500' : 'text-orange-300'
+                                }`} />
+                        </div>
 
-                <button
-                    onClick={() => {
-                        window.dispatchEvent(new Event("openCreatePostModal"));
-                        onClose();
-                    }}
-                    className="w-full py-2.5 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors"
-                >
-                    Start Streak
-                </button>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-1">
+                            {streakData.streakCount} {streakData.streakCount === 1 ? 'Day' : 'Days'}
+                        </h2>
+
+                        <p className="text-gray-500 text-sm mb-4">{getStreakMessage()}</p>
+
+                        {streakData.longestStreak > 0 && streakData.longestStreak > streakData.streakCount && (
+                            <p className="text-xs text-gray-400 mb-4">
+                                🏆 Your best streak: <span className="font-bold text-gray-600">{streakData.longestStreak} days</span>
+                            </p>
+                        )}
+
+                        <button
+                            onClick={handleStartStreak}
+                            className="w-full py-2.5 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors"
+                        >
+                            {streakData.streakCount > 0 ? 'Keep the Streak' : 'Start Streak'}
+                        </button>
+                    </>
+                )}
             </div>
         </div>
     );

@@ -119,6 +119,48 @@ router.post("/", verifyToken, async (req, res) => {
         // Populate author immediately for frontend return
         await savedPost.populate("author", "name avatarUrl username headline");
 
+        // --- UPDATE USER STREAK ---
+        try {
+            const user = await User.findById(req.user._id);
+            if (user) {
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+                let newStreakCount = user.streakCount || 0;
+
+                if (user.lastPostDate) {
+                    const lastPost = new Date(user.lastPostDate);
+                    const lastPostDay = new Date(lastPost.getFullYear(), lastPost.getMonth(), lastPost.getDate());
+                    const daysDiff = Math.floor((today - lastPostDay) / (1000 * 60 * 60 * 24));
+
+                    if (daysDiff === 0) {
+                        // Already posted today - no streak change
+                    } else if (daysDiff === 1) {
+                        // Posted yesterday - increment streak
+                        newStreakCount += 1;
+                    } else {
+                        // Gap of more than 1 day - reset streak to 1
+                        newStreakCount = 1;
+                    }
+                } else {
+                    // First post ever - start streak at 1
+                    newStreakCount = 1;
+                }
+
+                // Update longest streak if new streak is higher
+                const newLongestStreak = Math.max(user.longestStreak || 0, newStreakCount);
+
+                await User.findByIdAndUpdate(req.user._id, {
+                    streakCount: newStreakCount,
+                    lastPostDate: now,
+                    longestStreak: newLongestStreak
+                });
+            }
+        } catch (streakErr) {
+            console.error("Failed to update streak:", streakErr);
+            // Don't fail the post creation if streak update fails
+        }
+
         res.status(201).json(savedPost);
     } catch (err) {
         res.status(500).json({ error: err.message });

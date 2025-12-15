@@ -79,14 +79,12 @@ export default function PostCard({ post }) {
       {/* Post Header */}
       <div className="p-4 flex gap-3">
         <Link href={`/u/${post.author.username}`}>
-          <Image
+          <img
             src={
-              post.author.avatarUrl ||
-              `https://ui-avatars.com/api/?name=${post.author.name}`
+              (post.author.avatarUrl && post.author.avatarUrl.length > 0 ? post.author.avatarUrl : null) ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name || 'User')}`
             }
             alt={post.author.name}
-            width={48}
-            height={48}
             className="rounded-full w-10 h-10 object-cover border border-gray-100 cursor-pointer"
           />
         </Link>
@@ -207,9 +205,8 @@ export default function PostCard({ post }) {
       <div className="px-4 py-3 flex items-center gap-6 mt-2 border-t border-gray-50 bg-white">
         <button
           onClick={handleLike}
-          className={`group flex items-center gap-2 text-sm font-medium transition-colors ${
-            liked ? "text-red-500" : "text-gray-500 hover:text-gray-900"
-          }`}
+          className={`group flex items-center gap-2 text-sm font-medium transition-colors ${liked ? "text-red-500" : "text-gray-500 hover:text-gray-900"
+            }`}
         >
           <span className="transform group-active:scale-125 transition-transform duration-200">
             <FaRegThumbsUp className={liked ? "fill-current" : ""} />

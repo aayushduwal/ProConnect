@@ -23,6 +23,7 @@ export default function SidebarRight() {
     const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     const [unreadCount, setUnreadCount] = useState(0);
+    const [streakCount, setStreakCount] = useState(0);
 
     const menuRef = useRef(null);
     const searchRef = useRef(null);
@@ -32,6 +33,7 @@ export default function SidebarRight() {
         const currentUser = getUser();
         setUser(currentUser);
         fetchUnreadCount();
+        fetchStreakCount();
     }, []);
 
     const fetchUnreadCount = async () => {
@@ -48,6 +50,22 @@ export default function SidebarRight() {
             }
         } catch (err) {
             console.error("Failed to fetch notifications", err);
+        }
+    };
+
+    const fetchStreakCount = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        try {
+            const res = await fetch("http://localhost:5000/api/streak", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setStreakCount(data.streakCount || 0);
+            }
+        } catch (err) {
+            console.error("Failed to fetch streak", err);
         }
     };
 
@@ -196,8 +214,8 @@ export default function SidebarRight() {
                                 onClick={() => setShowStreakMenu(true)}
                                 className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-all"
                             >
-                                <span className="text-sm font-bold text-orange-400">🥚</span>
-                                <span className="text-xs font-bold text-gray-700">0</span>
+                                <span className="text-sm font-bold text-orange-400">{streakCount > 0 ? '🔥' : '🥚'}</span>
+                                <span className="text-xs font-bold text-gray-700">{streakCount}</span>
                             </button>
 
                             <button

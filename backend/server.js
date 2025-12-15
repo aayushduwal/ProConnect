@@ -29,6 +29,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/posts", require("./routes/posts"));
 app.use("/api/upload", require("./routes/upload"));
+app.use("/api/streak", require("./routes/streak"));
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI =

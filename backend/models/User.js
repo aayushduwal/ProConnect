@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema(
     interests: [{ type: String, trim: true }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    // Streak tracking
+    streakCount: { type: Number, default: 0 },
+    lastPostDate: { type: Date, default: null },
+    longestStreak: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
