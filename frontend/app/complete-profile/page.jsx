@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function CompleteProfile() {
   const [firstName, setFirstName] = useState("");
@@ -9,8 +9,11 @@ export default function CompleteProfile() {
   const [bio, setBio] = useState("");
   const [username, setUsername] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [autoFill, setAutoFill] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
 
   const router = useRouter();
   const token =
@@ -34,9 +37,34 @@ export default function CompleteProfile() {
         if (user.bio) setBio(user.bio);
         if (user.username) setUsername(user.username);
         if (user.linkedinUrl) setLinkedinUrl(user.linkedinUrl);
+        if (user.avatarUrl) setAvatarUrl(user.avatarUrl);
       })
       .catch((err) => console.error("❌ Failed to load user data:", err));
   }, [token]);
+
+  // ✅ Handle Image Upload
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await axios.post("http://localhost:5000/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setAvatarUrl(res.data.url);
+    } catch (err) {
+      console.error("❌ Image upload failed:", err);
+      alert("Failed to upload image.");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   // ✅ Handle submit
   const handleSubmit = async (e) => {
@@ -61,12 +89,20 @@ export default function CompleteProfile() {
           bio: bio.trim(),
           username: username.trim(),
           linkedinUrl: linkedinUrl.trim(),
+          avatarUrl: avatarUrl,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       console.log("✅ Profile updated:", res.data);
-      router.push("/profile"); // Next.js navigation
+
+      // ✅ Update local storage with new user data
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(res.data));
+      }
+
+      // ✅ Force reload to update Header
+      window.location.href = "/profile";
     } catch (err) {
       console.error("❌ Update failed:", err);
       alert(err.response?.data?.message || "Failed to update profile");
@@ -84,6 +120,52 @@ export default function CompleteProfile() {
         <p className="text-center text-gray-500 mb-6">
           First things first, tell us a bit about yourself!
         </p>
+
+        <div className="flex justify-center mb-6">
+          <div className="relative group cursor-pointer" onClick={() => fileInputRef.current.click()}>
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-green-500 bg-gray-100 flex items-center justify-center">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <svg
+                  className="w-12 h-12 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  ></path>
+                </svg>
+              )}
+              {uploadingImage && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                </div>
+              )}
+            </div>
+            <div className="absolute bottom-0 right-0 bg-green-600 p-1.5 rounded-full border-2 border-white shadow-sm">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+          </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            onChange={handleImageUpload}
+          />
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* First + Last name */}

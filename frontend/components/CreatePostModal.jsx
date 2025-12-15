@@ -188,11 +188,14 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                     <div className="flex gap-3">
                         <div className="relative w-10 h-10 flex-shrink-0">
                             {user?.profilePic || user?.avatarUrl ? (
-                                <Image
-                                    src={user.profilePic || user.avatarUrl}
+                                <img
+                                    src={
+                                        (user.profilePic && user.profilePic.length > 0 ? user.profilePic : null) ||
+                                        (user.avatarUrl && user.avatarUrl.length > 0 ? user.avatarUrl : null) ||
+                                        `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}`
+                                    }
                                     alt="User"
-                                    fill
-                                    className="rounded-full object-cover"
+                                    className="w-full h-full rounded-full object-cover"
                                 />
                             ) : (
                                 <div className="w-10 h-10 bg-gray-200 rounded-full"></div>

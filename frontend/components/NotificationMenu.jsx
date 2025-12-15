@@ -170,11 +170,14 @@ export default function NotificationMenu({ onClose }) {
                                     className={`p-4 hover:bg-gray-50 transition-colors flex gap-3 ${!notif.read ? 'bg-blue-50/30' : ''}`}
                                 >
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
-                                        <Image
-                                            src={notif.sender?.profilePicture || notif.sender?.avatarUrl || `https://ui-avatars.com/api/?name=${notif.sender?.name || 'User'}`}
-                                            fill
+                                        <img
+                                            src={
+                                                (notif.sender?.profilePicture && notif.sender.profilePicture.length > 0 ? notif.sender.profilePicture : null) ||
+                                                (notif.sender?.avatarUrl && notif.sender.avatarUrl.length > 0 ? notif.sender.avatarUrl : null) ||
+                                                `https://ui-avatars.com/api/?name=${encodeURIComponent(notif.sender?.name || 'User')}`
+                                            }
                                             alt={notif.sender?.name}
-                                            className="object-cover"
+                                            className="w-full h-full object-cover"
                                         />
                                     </div>
 

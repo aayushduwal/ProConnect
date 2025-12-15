@@ -154,11 +154,14 @@ export default function NetworkModal({ userId, startTab = "followers", onClose }
                                         className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors group"
                                     >
                                         <div className="relative w-10 h-10 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
-                                            <Image
-                                                src={u.profilePicture || u.avatarUrl || `https://ui-avatars.com/api/?name=${u.name}`}
-                                                fill
+                                            <img
+                                                src={
+                                                    (u.profilePicture && u.profilePicture.length > 0 ? u.profilePicture : null) ||
+                                                    (u.avatarUrl && u.avatarUrl.length > 0 ? u.avatarUrl : null) ||
+                                                    `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'User')}`
+                                                }
                                                 alt={u.name}
-                                                className="object-cover"
+                                                className="w-full h-full object-cover"
                                             />
                                         </div>
                                         <div className="flex-1 min-w-0">

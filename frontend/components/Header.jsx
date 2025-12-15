@@ -78,15 +78,14 @@ export default function Header() {
                 className="flex items-center gap-2 focus:outline-none"
               >
                 <div className="relative w-9 h-9 rounded-full overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                  <Image
+                  <img
                     src={
-                      user.profilePic ||
-                      user.avatarUrl ||
-                      `https://ui-avatars.com/api/?name=${user.name}`
+                      (user.profilePic && user.profilePic.length > 0 ? user.profilePic : null) ||
+                      (user.avatarUrl && user.avatarUrl.length > 0 ? user.avatarUrl : null) ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}`
                     }
-                    fill
                     alt="Profile"
-                    className="object-cover"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               </button>

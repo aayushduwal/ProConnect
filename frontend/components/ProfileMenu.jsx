@@ -52,10 +52,13 @@ export default function ProfileMenu({ user, onClose }) {
                 </button>
             </div>
 
-            {/* User Info */}
             <div className="px-4 py-2 flex items-start gap-3">
-                <Image
-                    src={user?.profilePic || user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.name || 'User'}`}
+                <img
+                    src={
+                        (user?.profilePic && user.profilePic.length > 0 ? user.profilePic : null) ||
+                        (user?.avatarUrl && user.avatarUrl.length > 0 ? user.avatarUrl : null) ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}`
+                    }
                     width={40}
                     height={40}
                     className="rounded-full border border-gray-100"

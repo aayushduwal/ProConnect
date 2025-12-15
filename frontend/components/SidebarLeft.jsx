@@ -93,11 +93,14 @@ export default function SidebarLeft() {
                 <div className="mt-auto mb-4 mr-6">
                     <Link href={`/u/${user.username}`} className="flex items-center gap-3 p-3 hover:bg-gray-100 rounded-2xl transition-all cursor-pointer group">
                         <div className="relative w-10 h-10 rounded-full overflow-hidden border border-gray-200">
-                            <Image
-                                src={user.profilePicture || user.avatarUrl || `https://ui-avatars.com/api/?name=${user.name}`}
-                                fill
+                            <img
+                                src={
+                                    (user.profilePicture && user.profilePicture.length > 0 ? user.profilePicture : null) ||
+                                    (user.avatarUrl && user.avatarUrl.length > 0 ? user.avatarUrl : null) ||
+                                    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}`
+                                }
                                 alt={user.name}
-                                className="object-cover"
+                                className="w-full h-full object-cover"
                             />
                         </div>
                         <div className="flex-1 min-w-0">

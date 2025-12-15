@@ -29,6 +29,8 @@ export default function Login() {
 
     try {
       const res = await api.post("/auth/login", formData);
+      console.log("✅ Login response:", res.data); // Debug log
+      console.log("✅ User avatarUrl:", res.data.user?.avatarUrl); // Debug avatarUrl specifically
       saveSession(res.data.user, res.data.token);
       setMessage("✅ Login successful!");
       setTimeout(() => (window.location.href = "/"), 1000);
@@ -163,9 +165,8 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full bg-gray-900 hover:bg-black text-white font-semibold py-2 rounded-2xl transition ${
-                loading ? "opacity-70 cursor-not-allowed" : ""
-              }`}
+              className={`w-full bg-gray-900 hover:bg-black text-white font-semibold py-2 rounded-2xl transition ${loading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
             >
               {loading ? "Logging in..." : "Login →"}
             </button>

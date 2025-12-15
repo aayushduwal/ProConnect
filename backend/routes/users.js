@@ -148,7 +148,21 @@ router.put("/me", authMiddleware, async (req, res) => {
     const updated = await User.findByIdAndUpdate(req.user.id, req.body, {
       new: true,
     });
-    res.json(updated);
+    // Return consistent user object format (matching login response)
+    res.json({
+      id: updated._id,
+      name: updated.name,
+      username: updated.username,
+      email: updated.email,
+      verified: updated.verified,
+      avatarUrl: updated.avatarUrl,
+      bio: updated.bio,
+      linkedinUrl: updated.linkedinUrl,
+      skills: updated.skills,
+      interests: updated.interests,
+      followers: updated.followers,
+      following: updated.following,
+    });
   } catch (err) {
     console.error("Update failed:", err);
     res.status(500).json({ message: "Failed to update profile" });

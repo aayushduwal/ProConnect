@@ -127,11 +127,14 @@ export default function PublicProfile() {
                     <div className="px-8 pb-8">
                         <div className="relative flex justify-between items-end -mt-12 mb-6">
                             <div className="relative w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden bg-white">
-                                <Image
-                                    src={user.profilePicture || user.avatarUrl || `https://ui-avatars.com/api/?name=${user.name}`}
-                                    fill
+                                <img
+                                    src={
+                                        (user.profilePicture && user.profilePicture.length > 0 ? user.profilePicture : null) ||
+                                        (user.avatarUrl && user.avatarUrl.length > 0 ? user.avatarUrl : null) ||
+                                        `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}`
+                                    }
                                     alt={user.name}
-                                    className="object-cover"
+                                    className="w-full h-full object-cover"
                                 />
                             </div>
 

@@ -96,6 +96,7 @@ router.post("/login", async (req, res) => {
         username: user.username,
         email: user.email,
         verified: user.verified,
+        avatarUrl: user.avatarUrl,
       },
       token,
     });

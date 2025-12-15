@@ -3,6 +3,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header from "../../components/Header";
+import { logout } from "../../utils/auth";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -47,8 +48,7 @@ export default function ProfilePage() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/login");
+    logout();
   };
 
   return (

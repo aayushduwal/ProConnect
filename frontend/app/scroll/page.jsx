@@ -39,8 +39,9 @@ export default function ScrollPage() {
       const headers = {};
 
       // Send user ID if logged in so backend can return proper like status
-      if (currentUser?._id) {
-        headers['x-user-id'] = currentUser._id;
+      const userId = currentUser?.id || currentUser?._id;
+      if (userId) {
+        headers['x-user-id'] = userId;
       }
 
       const res = await fetch("http://localhost:5000/api/posts", { headers });
@@ -124,14 +125,13 @@ export default function ScrollPage() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6 transition-shadow hover:shadow-md">
             <div className="flex gap-4 items-start">
               <div className="relative w-10 h-10 flex-shrink-0">
-                <Image
+                <img
                   src={
-                    user.profilePic ||
-                    user.avatarUrl ||
-                    `https://ui-avatars.com/api/?name=${user.name}`
+                    (user.profilePic && user.profilePic.length > 0 ? user.profilePic : null) ||
+                    (user.avatarUrl && user.avatarUrl.length > 0 ? user.avatarUrl : null) ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}`
                   }
-                  fill
-                  className="rounded-full object-cover border border-gray-100"
+                  className="w-full h-full rounded-full object-cover border border-gray-100"
                   alt="Me"
                 />
               </div>

@@ -165,11 +165,14 @@ export default function SidebarRight() {
                                                 className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 cursor-pointer transition-colors"
                                             >
                                                 <div className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-100 flex-shrink-0">
-                                                    <Image
-                                                        src={result.profilePicture || result.avatarUrl || `https://ui-avatars.com/api/?name=${result.name}`}
-                                                        fill
+                                                    <img
+                                                        src={
+                                                            (result.profilePicture && result.profilePicture.length > 0 ? result.profilePicture : null) ||
+                                                            (result.avatarUrl && result.avatarUrl.length > 0 ? result.avatarUrl : null) ||
+                                                            `https://ui-avatars.com/api/?name=${encodeURIComponent(result.name || 'User')}`
+                                                        }
                                                         alt={result.name}
-                                                        className="object-cover"
+                                                        className="w-full h-full object-cover"
                                                     />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
@@ -215,11 +218,14 @@ export default function SidebarRight() {
                                     className="relative w-9 h-9 rounded-full border border-gray-200 overflow-hidden hover:ring-2 hover:ring-gray-100 transition-all cursor-pointer"
                                 >
                                     {user ? (
-                                        <Image
-                                            src={user.profilePic || user.avatarUrl || `https://ui-avatars.com/api/?name=${user.name}`}
-                                            fill
+                                        <img
+                                            src={
+                                                (user.profilePic && user.profilePic.length > 0 ? user.profilePic : null) ||
+                                                (user.avatarUrl && user.avatarUrl.length > 0 ? user.avatarUrl : null) ||
+                                                `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}`
+                                            }
                                             alt="Profile"
-                                            className="object-cover"
+                                            className="w-full h-full object-cover"
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
