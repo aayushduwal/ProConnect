@@ -93,6 +93,13 @@ export default function SidebarRight() {
         return () => clearTimeout(delayDebounceFn);
     }, [searchQuery]);
 
+    const handleUserClick = (username) => {
+        router.push(`/u/${username}`);
+        setShowResults(false);
+        setSearchQuery("");
+        setIsSearchFocused(false);
+    };
+
     const handleNotificationClick = () => {
         if (showNotificationMenu) {
             setShowNotificationMenu(false);
