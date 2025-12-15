@@ -10,7 +10,7 @@ import NotificationMenu from "./NotificationMenu";
 import { getUser } from "../utils/auth";
 import { useRouter } from "next/navigation";
 
-export default function SidebarRight() {
+export default function SidebarRight({ children }) {
     const [user, setUser] = useState(null);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showStreakMenu, setShowStreakMenu] = useState(false);
@@ -259,6 +259,7 @@ export default function SidebarRight() {
 
             {/* Scrollable Content Part */}
             <div className="p-6 space-y-6 overflow-y-auto h-[calc(100vh-64px)] sticky top-16">
+                {children}
 
                 {/* Footer Links */}
                 <div className="flex flex-wrap gap-2 text-[11px] text-gray-400 px-2 font-medium">

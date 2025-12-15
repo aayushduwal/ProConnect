@@ -162,6 +162,11 @@ router.put("/me", authMiddleware, async (req, res) => {
       interests: updated.interests,
       followers: updated.followers,
       following: updated.following,
+      location: updated.location,
+      pronouns: updated.pronouns,
+      website: updated.website,
+      calendarLink: updated.calendarLink,
+      socialLinks: updated.socialLinks,
     });
   } catch (err) {
     console.error("Update failed:", err);

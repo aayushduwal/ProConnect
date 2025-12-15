@@ -11,7 +11,9 @@ import {
     FaGift,
     FaChartBar,
     FaTools,
-    FaSignOutAlt
+    FaSignOutAlt,
+    FaUserEdit,
+    FaUser
 } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,7 +29,8 @@ export default function ProfileMenu({ user, onClose }) {
     };
 
     const menuItems = [
-        { icon: <FaCog />, label: "Settings", sub: "Edit profile, account, notifications, +2 more." },
+        { icon: <FaUser />, label: "View Profile", link: `/u/${user?.username || user?.name || ''}` },
+        { icon: <FaCog />, label: "Settings", sub: "Edit profile, account, notifications, etc.", link: "/profile" },
         { icon: <FaBookmark />, label: "Bookmarks", sub: "Saved projects and posts to visit later." },
         { icon: <FaBriefcase />, label: "Job Preferences", sub: "Your availability and role preferences." },
         { icon: <FaCheckCircle />, label: "Verification", sub: "Manage identity and other verifications." },
@@ -72,22 +75,34 @@ export default function ProfileMenu({ user, onClose }) {
 
             {/* Menu List */}
             <div className="py-2">
-                {menuItems.map((item, idx) => (
-                    <div key={idx} className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors flex items-start gap-4">
-                        <div className="mt-1 text-gray-700 text-lg">{item.icon}</div>
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[15px] font-medium text-gray-800">{item.label}</span>
-                                {item.badge && (
-                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${item.badge === 'Not Connected' ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-600'}`}>
-                                        {item.badge}
-                                    </span>
-                                )}
+                {menuItems.map((item, idx) => {
+                    const Content = () => (
+                        <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors flex items-start gap-4">
+                            <div className="mt-1 text-gray-700 text-lg">{item.icon}</div>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[15px] font-medium text-gray-800">{item.label}</span>
+                                    {item.badge && (
+                                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${item.badge === 'Not Connected' ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-600'}`}>
+                                            {item.badge}
+                                        </span>
+                                    )}
+                                </div>
+                                {item.sub && <p className="text-xs text-gray-500 mt-0.5">{item.sub}</p>}
                             </div>
-                            <p className="text-xs text-gray-500 mt-0.5">{item.sub}</p>
                         </div>
-                    </div>
-                ))}
+                    );
+
+                    return item.link ? (
+                        <Link key={idx} href={item.link} onClick={onClose}>
+                            <Content />
+                        </Link>
+                    ) : (
+                        <div key={idx}>
+                            <Content />
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Logout */}
