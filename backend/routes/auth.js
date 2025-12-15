@@ -25,6 +25,7 @@ router.post("/register", async (req, res) => {
         .json({ message: "Email and password are required" });
     }
 
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -35,12 +36,16 @@ router.post("/register", async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Auto-verify if email is from a .edu.np domain
+    const isEduEmail = email.endsWith(".edu.np");
+
     // Create user with empty name & username
     const user = new User({
       email,
       password: hashedPassword,
       name: "",
       username: `user_${Date.now()}`,
+      verified: isEduEmail, // Set based on domain
     });
 
     await user.save();
@@ -87,6 +92,14 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // Lazy Migration: Sync verification status
+    const shouldBeVerified = user.email.endsWith(".edu.np");
+
+    if (user.verified !== shouldBeVerified) {
+      user.verified = shouldBeVerified;
+      await user.save();
+    }
+
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
 
     res.json({
@@ -129,15 +142,25 @@ router.post("/google", async (req, res) => {
 
     if (!user) {
       // Create a new user
+      const isEduEmail = email.endsWith(".edu.np");
+
       user = new User({
         email,
         name: name || "",
         username: `user_${Date.now()}`, // Temporary username
         avatarUrl: picture || "",
-        verified: true,
+        verified: isEduEmail, // Only verify if college email
         // password is not set (undefined)
       });
       await user.save();
+      await user.save();
+    } else {
+      // Check existing user for verification eligibility (Grant OR Revoke)
+      const shouldBeVerified = user.email.endsWith(".edu.np");
+      if (user.verified !== shouldBeVerified) {
+        user.verified = shouldBeVerified;
+        await user.save();
+      }
     }
 
     // Generate JWT for our app

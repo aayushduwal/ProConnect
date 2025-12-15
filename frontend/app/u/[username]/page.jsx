@@ -4,9 +4,76 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import Header from "../../../components/Header";
 import { getUser, getToken } from "../../../utils/auth";
-import { FaCheck } from "react-icons/fa";
-import { FiCalendar } from "react-icons/fi";
+import { FaCheck, FaGithub, FaLink } from "react-icons/fa";
+import { FiCalendar, FiMapPin, FiBriefcase, FiFileText, FiGrid } from "react-icons/fi";
+import { FaTwitter, FaInstagram, FaLinkedin, FaGlobe } from "react-icons/fa";
 import NetworkModal from "../../../components/NetworkModal";
+import { getSkillIcon, formatDisplayName } from "../../../utils/skillUtils";
+import PostCard from "../../../components/PostCard";
+
+// Social Icon Helper
+const getSocialIcon = (platform) => {
+    switch (platform) {
+        case "twitter": return <FaTwitter size={18} />;
+        case "instagram": return <FaInstagram size={18} />;
+        case "linkedin": return <FaLinkedin size={18} />;
+        case "github": return <FaGithub size={18} />;
+        default: return <FaGlobe size={18} />;
+    }
+};
+
+// Simplified GitHub Repos Component
+const GitHubRepos = ({ username }) => {
+    const [repos, setRepos] = useState([]);
+
+    useEffect(() => {
+        if (!username) return;
+        fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=6`)
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setRepos(data);
+            })
+            .catch(err => console.error("GitHub fetch error:", err));
+    }, [username]);
+
+    if (repos.length === 0) return null;
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {repos.map(repo => (
+                <a
+                    key={repo.id}
+                    href={repo.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-sm transition-all bg-white"
+                >
+                    <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-bold text-gray-900 truncate pr-2">{repo.name}</h4>
+                        <span className="text-xs border border-gray-200 px-2 py-0.5 rounded-full text-gray-500 whitespace-nowrap">
+                            {repo.visibility || 'public'}
+                        </span>
+                    </div>
+                    <p className="text-sm text-gray-500 line-clamp-2 h-10 mb-3">{repo.description || "No description available."}</p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                        {repo.language && (
+                            <div className="flex items-center gap-1">
+                                <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
+                                {repo.language}
+                            </div>
+                        )}
+                        <div className="flex items-center gap-1">
+                            <span>⭐</span> {repo.stargazers_count}
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <span>🍴</span> {repo.forks_count}
+                        </div>
+                    </div>
+                </a>
+            ))}
+        </div>
+    );
+};
 
 export default function PublicProfile() {
     const { username } = useParams();
@@ -16,10 +83,15 @@ export default function PublicProfile() {
     const [error, setError] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
     const [followLoading, setFollowLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState("posts");
 
     // Network Modal State
     const [showNetworkModal, setShowNetworkModal] = useState(false);
     const [networkTab, setNetworkTab] = useState("followers");
+
+    // Posts State
+    const [userPosts, setUserPosts] = useState([]);
+    const [postsLoading, setPostsLoading] = useState(false);
 
     useEffect(() => {
         const loggedInUser = getUser();
@@ -51,6 +123,20 @@ export default function PublicProfile() {
             })
             .finally(() => setLoading(false));
     }, [username]);
+
+    // Fetch posts when tab changes to 'posts'
+    useEffect(() => {
+        if (activeTab === 'posts' && user && user._id) {
+            setPostsLoading(true);
+            fetch(`http://localhost:5000/api/posts/user/${user._id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) setUserPosts(data);
+                })
+                .catch(err => console.error("Failed to fetch user posts", err))
+                .finally(() => setPostsLoading(false));
+        }
+    }, [activeTab, user]);
 
     const handleFollowToggle = async () => {
         if (!currentUser || !user) return;
@@ -91,10 +177,10 @@ export default function PublicProfile() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex flex-col bg-[#FAFAFA]">
+            <div className="min-h-screen flex flex-col bg-white">
                 <Header />
                 <div className="flex-1 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
                 </div>
             </div>
         );
@@ -102,7 +188,7 @@ export default function PublicProfile() {
 
     if (error || !user) {
         return (
-            <div className="min-h-screen flex flex-col bg-[#FAFAFA]">
+            <div className="min-h-screen flex flex-col bg-white">
                 <Header />
                 <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">User not found 😕</h2>
@@ -113,20 +199,19 @@ export default function PublicProfile() {
     }
 
     const isMe = currentUser && (currentUser._id === user._id || currentUser.id === user._id);
+    const socialLinks = user.socialLinks || {};
 
     return (
-        <div className="min-h-screen flex flex-col bg-[#FAFAFA]">
+        <div className="min-h-screen flex flex-col bg-white">
             <Header />
 
-            <main className="flex-1 flex flex-col items-center px-4 py-12">
-                <div className="w-full max-w-2xl bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+            <main className="flex-1 flex flex-col items-center px-4 pt-24 pb-8">
+                <div className="w-full max-w-4xl">
 
-                    {/* Cover / Header Area */}
-                    <div className="h-32 bg-gradient-to-r from-gray-100 to-gray-200 w-full relative"></div>
-
-                    <div className="px-8 pb-8">
-                        <div className="relative flex justify-between items-end -mt-12 mb-6">
-                            <div className="relative w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden bg-white">
+                    {/* Top Section: Avatar & Basic Info */}
+                    <div className="flex flex-col items-center text-center mb-8">
+                        <div className="relative mb-4">
+                            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md">
                                 <img
                                     src={
                                         (user.profilePicture && user.profilePicture.length > 0 ? user.profilePicture : null) ||
@@ -137,75 +222,261 @@ export default function PublicProfile() {
                                     className="w-full h-full object-cover"
                                 />
                             </div>
+                        </div>
 
-                            {/* Follow Button */}
+                        <div className="flex items-center gap-2 mb-1">
+                            <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+                            {user.verified && <FaCheck className="text-green-500 text-sm" title="Verified" />}
+                        </div>
+
+                        {user.bio && (
+                            <p className="text-gray-600 max-w-lg mb-3 leading-relaxed">
+                                {user.bio}
+                            </p>
+                        )}
+
+                        <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                            {user.location && (
+                                <div className="flex items-center gap-1">
+                                    <FiMapPin />
+                                    <span>{user.location}</span>
+                                </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                                <FiCalendar />
+                                <span>Joined {new Date(user.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
+                            </div>
+                            {user.website && (
+                                <a
+                                    href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 hover:text-green-600 transition-colors"
+                                >
+                                    <FaLink />
+                                    <span>Website</span>
+                                </a>
+                            )}
+                        </div>
+
+                        {/* Skills Row */}
+                        {user.skills && user.skills.length > 0 && (
+                            <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-2xl">
+                                {user.skills.map((skill, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors cursor-default"
+                                    >
+                                        <span className="opacity-80 scale-90">{getSkillIcon(skill)}</span>
+                                        <span>{formatDisplayName(skill)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 mb-8">
                             {!isMe && currentUser && (
                                 <button
                                     onClick={handleFollowToggle}
                                     disabled={followLoading}
                                     className={`px-6 py-2 rounded-full font-bold text-sm transition-all shadow-sm flex items-center gap-2 ${isFollowing
                                         ? "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                                        : "bg-black text-white hover:bg-gray-900 border border-transparent"
+                                        : "bg-green-600 text-white hover:bg-green-700 border border-transparent"
                                         }`}
                                 >
-                                    {isFollowing ? (
-                                        <>
-                                            <FaCheck size={12} />
-                                            Following
-                                        </>
-                                    ) : (
-                                        "Follow"
-                                    )}
+                                    {isFollowing ? "Following" : "Follow"}
                                 </button>
                             )}
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-                                <p className="text-gray-500 font-medium">@{user.username}</p>
-                            </div>
-
-                            <div className="flex gap-4 text-sm text-gray-600">
-                                <button
-                                    onClick={() => openNetworkModal("following")}
-                                    className="font-medium hover:text-gray-900 hover:underline"
-                                >
-                                    <span className="font-bold text-gray-900">{user.following?.length || 0}</span> Following
-                                </button>
+                            <div className="flex gap-4 items-center px-4">
                                 <button
                                     onClick={() => openNetworkModal("followers")}
-                                    className="font-medium hover:text-gray-900 hover:underline"
+                                    className="text-sm text-gray-600 hover:text-green-600"
                                 >
-                                    <span className="font-bold text-gray-900">{user.followers?.length || 0}</span> Followers
+                                    <span className="font-bold text-gray-900">{user.followers?.length || 0}</span> followers
                                 </button>
-                            </div>
-
-                            {user.bio && (
-                                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                                    {user.bio}
-                                </p>
-                            )}
-
-                            <div className="pt-4 flex flex-wrap gap-4 text-sm text-gray-500">
-                                {user.linkedinUrl && (
-                                    <a
-                                        href={user.linkedinUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="hover:text-blue-600 flex items-center gap-1 transition-colors"
-                                    >
-                                        <span>🔗</span>
-                                        <span>LinkedIn</span>
-                                    </a>
-                                )}
-                                <div className="flex items-center gap-1.5">
-                                    <FiCalendar className="text-gray-400" />
-                                    <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
-                                </div>
+                                <button
+                                    onClick={() => openNetworkModal("following")}
+                                    className="text-sm text-gray-600 hover:text-green-600"
+                                >
+                                    <span className="font-bold text-gray-900">{user.following?.length || 0}</span> following
+                                </button>
                             </div>
                         </div>
                     </div>
+
+                    {/* Tabs */}
+                    <div className="border-b border-gray-200 mb-6">
+                        <div className="flex gap-8 justify-center">
+                            <button
+                                className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'work' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                                onClick={() => setActiveTab('work')}
+                            >
+                                WORK
+                            </button>
+                            <button
+                                className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'resume' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                                onClick={() => setActiveTab('resume')}
+                            >
+                                RESUME
+                            </button>
+                            <button
+                                className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'posts' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                                onClick={() => setActiveTab('posts')}
+                            >
+                                POSTS
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Tab Content */}
+                    <div className="min-h-[200px]">
+                        {activeTab === 'posts' && (
+                            <div className="flex flex-col gap-4">
+                                {postsLoading ? (
+                                    <div className="text-center py-8 text-gray-400 italic">Loading posts...</div>
+                                ) : userPosts.length > 0 ? (
+                                    userPosts.map(post => (
+                                        <PostCard key={post._id} post={post} currentUser={currentUser} />
+                                    ))
+                                ) : (
+                                    <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100 border-dashed">
+                                        <p className="text-gray-400">No posts yet.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {activeTab === 'work' && (
+                            <div className="flex flex-col gap-8">
+
+                                {/* GitHub Section */}
+                                {socialLinks.github && (
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <FaGithub size={24} className="text-gray-900" />
+                                            <h2 className="text-xl font-bold text-gray-900">GitHub</h2>
+                                        </div>
+
+                                        {/* Contribution Graph (Image based for simplicity) */}
+                                        <div className="w-full overflow-hidden rounded-lg border border-gray-200 p-4 bg-white">
+                                            <h3 className="text-sm font-medium text-gray-500 mb-4">Contributions in the last year</h3>
+                                            <div className="w-full overflow-x-auto">
+                                                <img
+                                                    src={`https://ghchart.rshah.org/4faa41/${socialLinks.github}`}
+                                                    alt="GitHub Contributions"
+                                                    className="min-w-[600px] w-full"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* GitHub Repos (Client-side fetch wrapper would be ideal, but for now specific component logic) */}
+                                        <GitHubRepos username={socialLinks.github} />
+                                    </div>
+                                )}
+
+                                {/* Projects Section */}
+                                {user.projects && user.projects.length > 0 ? (
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <FiGrid size={24} className="text-gray-900" />
+                                            <h2 className="text-xl font-bold text-gray-900">My Projects</h2>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {user.projects.map((project, idx) => (
+                                                <div key={idx} className="border border-gray-200 rounded-xl p-4 hover:border-green-500 transition-colors bg-white">
+                                                    <div className="flex items-start justify-between mb-2">
+                                                        <div className="flex items-center gap-3">
+                                                            {project.image ? (
+                                                                <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100">
+                                                                    <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+                                                                </div>
+                                                            ) : (
+                                                                <div className="w-10 h-10 rounded-md bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
+                                                                    {project.title.charAt(0)}
+                                                                </div>
+                                                            )}
+                                                            <div>
+                                                                <h3 className="font-bold text-gray-900 line-clamp-1">{project.title}</h3>
+                                                                {project.link && (
+                                                                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-green-600 flex items-center gap-1">
+                                                                        View Project <FaLink size={10} />
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 min-h-[40px]">{project.description}</p>
+
+                                                    {project.tags && project.tags.length > 0 && (
+                                                        <div className="flex flex-wrap gap-2 mt-auto">
+                                                            {project.tags.slice(0, 3).map((tag, tIdx) => (
+                                                                <span key={tIdx} className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-md">
+                                                                    {tag}
+                                                                </span>
+                                                            ))}
+                                                            {project.tags.length > 3 && <span className="text-xs text-gray-400">+{project.tags.length - 3}</span>}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    !socialLinks.github && (
+                                        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100 border-dashed">
+                                            <div className="mx-auto w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mb-3">
+                                                <FiBriefcase className="text-gray-400" />
+                                            </div>
+                                            <h3 className="text-gray-900 font-medium">Work & Projects</h3>
+                                            <p className="text-gray-500 text-sm mt-1">Hasn't added any work or projects yet.</p>
+                                        </div>
+                                    )
+                                )}
+
+                            </div>
+                        )}
+                        {activeTab === 'resume' && (
+                            <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100 border-dashed">
+                                <div className="mx-auto w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mb-3">
+                                    <FiFileText className="text-gray-400" />
+                                </div>
+                                <h3 className="text-gray-900 font-medium">Resume</h3>
+                                <p className="text-gray-500 text-sm mt-1">Resume not available.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Footer / Socials - Inspired by Peerlist Bottom Section */}
+                    <div className="border-t border-gray-200 mt-12 pt-8 flex justify-center pb-8">
+                        <div className="flex gap-4">
+                            {/* Render Social Links if they exist */}
+                            {Object.entries(socialLinks).map(([platform, handle]) => {
+                                if (!handle) return null;
+                                // Simple URL builder assumption
+                                let url = handle;
+                                if (!url.startsWith('http')) {
+                                    if (platform === 'twitter') url = `https://twitter.com/${handle}`;
+                                    else if (platform === 'instagram') url = `https://instagram.com/${handle}`;
+                                    else if (platform === 'github') url = `https://github.com/${handle}`;
+                                    else if (platform === 'linkedin') url = handle; // LinkedIn usually full url
+                                }
+
+                                return (
+                                    <a
+                                        key={platform}
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-gray-400 hover:text-gray-900 transition-colors p-2 hover:bg-gray-100 rounded-full"
+                                        title={platform}
+                                    >
+                                        {getSocialIcon(platform)}
+                                    </a>
+                                )
+                            })}
+                        </div>
+                    </div>
+
                 </div>
             </main>
 

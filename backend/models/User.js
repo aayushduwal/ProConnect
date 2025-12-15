@@ -39,9 +39,21 @@ const userSchema = new mongoose.Schema(
       tiktok: { type: String, default: "" },
       youtube: { type: String, default: "" },
       threads: { type: String, default: "" },
+      github: { type: String, default: "" }, // Added GitHub
     },
     skills: [{ type: String, trim: true }],
     interests: [{ type: String, trim: true }],
+    // Work / Projects Section
+    projects: [
+      {
+        title: { type: String, required: true },
+        description: { type: String },
+        link: { type: String },
+        repoLink: { type: String },
+        image: { type: String }, // Thumbnail URL
+        tags: [{ type: String }], // Tech stack
+      }
+    ],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     // Streak tracking

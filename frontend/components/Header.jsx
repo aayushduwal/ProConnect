@@ -31,7 +31,7 @@ export default function Header() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
-      <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-4">
+      <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-4 relative">
         {/* Logo Section */}
         <Link href="/" className="flex items-center gap-2 group">
           <div className="relative w-8 h-8 overflow-hidden rounded-lg shadow-sm group-hover:shadow-md transition-shadow">
@@ -47,8 +47,8 @@ export default function Header() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-500">
+        {/* Desktop Navigation - Absolutely Centered */}
+        <div className="hidden md:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 items-center gap-8 text-sm font-medium text-gray-500">
           <Link href="/scroll" className="hover:text-gray-900 transition-colors">
             Scroll
           </Link>

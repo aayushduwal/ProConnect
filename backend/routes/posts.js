@@ -95,6 +95,19 @@ router.get("/", async (req, res) => {
     }
 });
 
+// GET posts by a specific user
+router.get("/user/:userId", async (req, res) => {
+    try {
+        const posts = await Post.find({ author: req.params.userId })
+            .populate("author", "name avatarUrl username headline")
+            .populate("comments.user", "name avatarUrl username")
+            .sort({ createdAt: -1 });
+        res.json(posts);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // POST create a new post
 router.post("/", verifyToken, async (req, res) => {
     try {
