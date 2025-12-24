@@ -4,10 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import SidebarLeft from "../../components/SidebarLeft";
 import SidebarRight from "../../components/SidebarRight";
-import { FaUser, FaInbox, FaCog, FaBell, FaBriefcase, FaGlobe } from "react-icons/fa";
+import { FaUser, FaInbox, FaCog, FaBell, FaBriefcase, FaGlobe, FaShieldAlt } from "react-icons/fa";
+import { getUser } from "../../utils/auth";
 
 export default function ProfileSettingsLayout({ children }) {
     const pathname = usePathname();
+    const [user, setUser] = React.useState(null);
+
+    React.useEffect(() => {
+        setUser(getUser());
+    }, []);
 
     const sidebarItems = [
         { name: "Profile", href: "/profile", icon: <FaUser /> },
@@ -16,6 +22,7 @@ export default function ProfileSettingsLayout({ children }) {
         { name: "Notifications", href: "/profile/notifications", icon: <FaBell /> },
         { name: "Job Preferences", href: "/profile/preferences", icon: <FaBriefcase /> },
         { name: "Custom Domain", href: "/profile/domain", icon: <FaGlobe />, badge: "Not Connected" },
+        ...(user?.role === "admin" ? [{ name: "Admin Panel", href: "/admin", icon: <FaShieldAlt /> }] : []),
     ];
 
     return (

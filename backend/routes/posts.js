@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Post = require("../models/Post");
 const User = require("../models/User");
+const { calculateContentSimilarity, calculateInteractionScore } = require("../utils/recommendationUtils");
 
 // Helper middleware to get user from request (assuming auth middleware sets req.user or we verify token here)
 // For now, we will assume the frontend sends the user ID in the headers or body since we are using Firebase token verification
@@ -33,56 +34,42 @@ router.get("/", async (req, res) => {
         if (!user) return res.json(posts);
 
         // --- 1. BUILD USER PREFERENCE PROFILE ---
-        const userPreferences = new Map();
-
-        // A. Explicit Signals (High Weight)
-        if (user.skills) user.skills.forEach(skill => userPreferences.set(skill.toLowerCase(), 5));
-        if (user.interests) user.interests.forEach(interest => userPreferences.set(interest.toLowerCase(), 3));
-
-        // B. Implicit Signals (Interaction History)
-        // Find posts user has Liked or Saved
-        // We'll filter existing posts array to avoid partial DB lookups, assuming 'posts' contains history
-        // In production, you'd aggregate this separately to avoid fetching *all* posts first.
-        const likedPosts = posts.filter(p => p.likes.some(id => id.toString() === userId));
-        const savedPosts = posts.filter(p => p.saves && p.saves.some(id => id.toString() === userId));
-
-        const updatePrefs = (post, weight) => {
-            if (post.skills) post.skills.forEach(s => userPreferences.set(s.toLowerCase(), (userPreferences.get(s.toLowerCase()) || 0) + weight));
-            if (post.technologies) post.technologies.forEach(t => userPreferences.set(t.toLowerCase(), (userPreferences.get(t.toLowerCase()) || 0) + weight));
-            if (post.category) userPreferences.set(post.category.toLowerCase(), (userPreferences.get(post.category.toLowerCase()) || 0) + weight);
-        };
-
-        likedPosts.forEach(p => updatePrefs(p, 2)); // Like = Medium signal
-        savedPosts.forEach(p => updatePrefs(p, 3)); // Save = Stronger signal
-
+        // Combine skills and interests for the user's content vector
+        const userContentBase = [
+            ...(user.skills || []),
+            ...(user.interests || [])
+        ];
 
         // --- 2. SCORE CANDIDATES ---
         const scoredPosts = posts.map(post => {
-            let score = 0;
-
-            // Content Similarity Score
-            const postTags = [
+            // A. Content Similarity (Cosine Similarity)
+            const itemContentBase = [
                 ...(post.skills || []),
                 ...(post.technologies || []),
                 post.category
-            ].filter(Boolean).map(t => t.toLowerCase());
+            ].filter(Boolean);
 
-            postTags.forEach(tag => {
-                if (userPreferences.has(tag)) {
-                    score += userPreferences.get(tag);
-                }
+            const contentSimilarity = calculateContentSimilarity(userContentBase, itemContentBase);
+
+            // B. Interaction Score (Weighted Signals)
+            const interactionScore = calculateInteractionScore(post, {
+                views: 0.1,
+                likes: 0.3,
+                saves: 0.4,
+                follows: 0.0 // Posts don't have followers, but could use author's followers
             });
 
-            // Popularity Boost (Normalize slightly so it doesn't overwhelm content match)
-            score += (post.likes.length * 0.5);
-            score += ((post.saves ? post.saves.length : 0) * 0.8);
-            score += ((post.views ? post.views.length : 0) * 0.05);
+            // C. Combined Final Score
+            // Combine both factors. Content similarity is normalized [0,1], 
+            // interaction score is raw (can be boosted/normalized as needed).
+            // We give content similarity a high impact by multiplying or adding with a base.
+            const finalScore = (contentSimilarity * 10) + interactionScore;
 
-            // Time Decay (Optional: fresher posts get slight boost)
+            // Optional: Time Decay (Optional: fresher posts get slight boost)
             const daysOld = (new Date() - new Date(post.createdAt)) / (1000 * 60 * 60 * 24);
-            score = score / (1 + daysOld * 0.1); // Decay factor
+            const decayedScore = finalScore / (1 + daysOld * 0.1);
 
-            return { ...post, score };
+            return { ...post, score: decayedScore, debug: { contentSimilarity, interactionScore } };
         });
 
         // --- 3. SORT & RETURN ---

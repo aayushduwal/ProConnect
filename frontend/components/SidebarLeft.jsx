@@ -73,6 +73,7 @@ export default function SidebarLeft() {
                     { name: "Jobs", icon: "💼", href: "#" },
                     { name: "Inbox", icon: "💬", href: "#" },
                     { name: "Search", icon: "🔍", href: "#" },
+                    ...(user?.role === "admin" ? [{ name: "Admin Panel", icon: "🛡️", href: "/admin" }] : []),
                 ].map((item) => (
                     <Link
                         key={item.name}

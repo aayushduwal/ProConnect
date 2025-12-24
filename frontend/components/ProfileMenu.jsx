@@ -38,6 +38,7 @@ export default function ProfileMenu({ user, onClose }) {
         { icon: <FaGift />, label: "Invite and Earn", sub: "See who joined using your invite link.", badge: "New" },
         { icon: <FaChartBar />, label: "Analytics", sub: "Views, clicks, and who viewed your profile." },
         { icon: <FaTools />, label: "Tools", sub: "JobHunt AI, GitHub Recap, and 2 more." },
+        ...(user?.role === "admin" ? [{ icon: <FaCog />, label: "Admin Panel", sub: "Manage users, posts, and system stats.", link: "/admin" }] : []),
     ];
 
     return (

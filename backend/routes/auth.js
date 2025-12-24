@@ -58,6 +58,7 @@ router.post("/register", async (req, res) => {
         id: user._id,
         email: user.email,
         verified: user.verified,
+        role: user.role,
       },
       token,
     });
@@ -110,6 +111,7 @@ router.post("/login", async (req, res) => {
         email: user.email,
         verified: user.verified,
         avatarUrl: user.avatarUrl,
+        role: user.role,
       },
       token,
     });
@@ -174,6 +176,7 @@ router.post("/google", async (req, res) => {
         email: user.email,
         verified: user.verified,
         avatarUrl: user.avatarUrl,
+        role: user.role,
       },
       token: appToken,
     });
