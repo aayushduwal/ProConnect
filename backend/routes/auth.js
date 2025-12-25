@@ -25,6 +25,20 @@ router.post("/register", async (req, res) => {
         .json({ message: "Email and password are required" });
     }
 
+    // Email Validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Please provide a valid email address." });
+    }
+
+    // Strong Password Validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character."
+      });
+    }
+
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });

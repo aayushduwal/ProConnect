@@ -156,7 +156,7 @@ export default function Landing() {
         {/* Community Grid */}
         <div className="mt-16 w-full">
           <p className="text-sm font-semibold text-gray-500 mb-6 uppercase tracking-wider text-center">
-            Join 162,105+ peers
+            Join 500+ peers
           </p>
         </div>
       </section>

@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Post = require("../models/Post");
 const User = require("../models/User");
+const fs = require("fs");
+const path = require("path");
 const { calculateContentSimilarity, calculateInteractionScore } = require("../utils/recommendationUtils");
 
 // Helper middleware to get user from request (assuming auth middleware sets req.user or we verify token here)
@@ -271,8 +273,24 @@ router.delete("/:id", verifyToken, async (req, res) => {
             return res.status(403).json({ error: "You can only delete your own posts" });
         }
 
+        // DELETE PHYSICAL FILE if it exists
+        if (post.mediaUrl && post.mediaUrl.includes("localhost:5000/uploads/")) {
+            try {
+                const filename = post.mediaUrl.split("/").pop();
+                const filePath = path.join(__dirname, "../uploads", filename);
+
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                    console.log(`Deleted file: ${filePath}`);
+                }
+            } catch (fileErr) {
+                console.error("Failed to delete physical file:", fileErr);
+                // We don't fail the whole request since the DB record is already being handled
+            }
+        }
+
         await Post.findByIdAndDelete(req.params.id);
-        res.json({ message: "Post deleted successfully" });
+        res.json({ message: "Post and associated file deleted successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -21,8 +21,8 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json({ limit: '100mb' }));
-app.use(express.urlencoded({ limit: '100mb', extended: true }));
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ limit: '500mb', extended: true }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -45,9 +45,12 @@ app.get("/", (req, res) => {
   res.send("✅Backend is running");
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`✅Server running on http://localhost:${PORT}`);
 });
+
+// Increase timeout for large file uploads (10 minutes)
+server.timeout = 600000;
 
 // Simple test route
 // app.get('/api/test', (req, res) => {
