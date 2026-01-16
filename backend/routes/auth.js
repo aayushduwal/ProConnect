@@ -107,6 +107,11 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // Check if banned
+    if (user.status === "banned") {
+      return res.status(403).json({ message: "Your account has been suspended for violating community guidelines." });
+    }
+
     // Lazy Migration: Sync verification status
     const shouldBeVerified = user.email.endsWith(".edu.np");
 
@@ -177,6 +182,11 @@ router.post("/google", async (req, res) => {
         user.verified = shouldBeVerified;
         await user.save();
       }
+    }
+
+    // Check if banned
+    if (user.status === "banned") {
+      return res.status(403).json({ message: "Your account has been suspended for violating community guidelines." });
     }
 
     // Generate JWT for our app
