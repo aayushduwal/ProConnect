@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Post = require("../models/Post");
 const User = require("../models/User");
+const Notification = require("../models/Notification");
 const fs = require("fs");
 const path = require("path");
 const { calculateContentSimilarity, calculateInteractionScore } = require("../utils/recommendationUtils");
@@ -25,6 +26,7 @@ router.get("/", async (req, res) => {
         let posts = await Post.find()
             .populate("author", "name avatarUrl username headline")
             .populate("comments.user", "name avatarUrl username")
+            .populate("comments.replies.user", "name avatarUrl username")
             .lean(); // Use lean for performance since we aren't saving these instances
 
         if (!userId) {
@@ -90,6 +92,7 @@ router.get("/user/:userId", async (req, res) => {
         const posts = await Post.find({ author: req.params.userId })
             .populate("author", "name avatarUrl username headline")
             .populate("comments.user", "name avatarUrl username")
+            .populate("comments.replies.user", "name avatarUrl username")
             .sort({ createdAt: -1 });
         res.json(posts);
     } catch (err) {
@@ -101,6 +104,11 @@ router.get("/user/:userId", async (req, res) => {
 router.post("/", verifyToken, async (req, res) => {
     try {
         const { content, title, image, mediaType, mediaUrl, skills, technologies, category } = req.body;
+
+        // Check if banned
+        if (req.user.status === "banned") {
+            return res.status(403).json({ error: "Your account has been suspended for violating community guidelines." });
+        }
 
         // Validate
         if (!content) return res.status(400).json({ error: "Content is required" });
@@ -175,6 +183,11 @@ router.put("/:id/like", verifyToken, async (req, res) => {
         const post = await Post.findById(req.params.id);
         if (!post) return res.status(404).json({ error: "Post not found" });
 
+        // Check if banned
+        if (req.user.status === "banned") {
+            return res.status(403).json({ error: "Suspended accounts cannot interact with posts." });
+        }
+
         const userId = req.user._id;
 
         // Check if already liked
@@ -187,6 +200,36 @@ router.put("/:id/like", verifyToken, async (req, res) => {
         }
 
         await post.save();
+
+        // Create notification for like
+        try {
+            if (!post.likes.includes(userId) && post.author.toString() !== userId.toString()) {
+                // This check is slightly wrong because we already pushed the userId
+                // Let's refine: if it's currently liked (newly added), send notification
+            }
+
+            // Re-evaluating: post.likes was just updated.
+            if (post.likes.includes(userId) && post.author.toString() !== userId.toString()) {
+                const existingNotification = await Notification.findOne({
+                    recipient: post.author,
+                    sender: userId,
+                    type: "like",
+                    post: post._id
+                });
+
+                if (!existingNotification) {
+                    await new Notification({
+                        recipient: post.author,
+                        sender: userId,
+                        type: "like",
+                        post: post._id
+                    }).save();
+                }
+            }
+        } catch (notificationErr) {
+            console.error("Failed to create like notification:", notificationErr);
+        }
+
         res.json(post.likes);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -198,6 +241,11 @@ router.post("/:id/comment", verifyToken, async (req, res) => {
     try {
         const { text } = req.body;
         if (!text) return res.status(400).json({ error: "Comment text is required" });
+
+        // Check if banned
+        if (req.user.status === "banned") {
+            return res.status(403).json({ error: "Suspended accounts cannot interact with posts." });
+        }
 
         const post = await Post.findById(req.params.id);
         if (!post) return res.status(404).json({ error: "Post not found" });
@@ -211,7 +259,73 @@ router.post("/:id/comment", verifyToken, async (req, res) => {
         await post.save();
 
         // Re-fetch to populate the new comment user
-        const updatedPost = await Post.findById(req.params.id).populate("comments.user", "name avatarUrl username");
+        const updatedPost = await Post.findById(req.params.id)
+            .populate("comments.user", "name avatarUrl username")
+            .populate("comments.replies.user", "name avatarUrl username");
+
+        // Create notification for comment
+        try {
+            if (post.author.toString() !== req.user._id.toString()) {
+                await new Notification({
+                    recipient: post.author,
+                    sender: req.user._id,
+                    type: "comment",
+                    post: post._id
+                }).save();
+            }
+        } catch (notificationErr) {
+            console.error("Failed to create comment notification:", notificationErr);
+        }
+
+        res.json(updatedPost.comments);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST add a reply to a comment
+router.post("/:id/comment/:commentId/reply", verifyToken, async (req, res) => {
+    try {
+        const { text } = req.body;
+        if (!text) return res.status(400).json({ error: "Reply text is required" });
+
+        // Check if banned
+        if (req.user.status === "banned") {
+            return res.status(403).json({ error: "Suspended accounts cannot interact with posts." });
+        }
+
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ error: "Post not found" });
+
+        const comment = post.comments.id(req.params.commentId);
+        if (!comment) return res.status(404).json({ error: "Comment not found" });
+
+        const newReply = {
+            user: req.user._id,
+            text,
+        };
+
+        comment.replies.push(newReply);
+        await post.save();
+
+        // Re-fetch to populate the new reply user
+        const updatedPost = await Post.findById(req.params.id)
+            .populate("comments.user", "name avatarUrl username")
+            .populate("comments.replies.user", "name avatarUrl username");
+
+        // Create notification for reply to the original commenter
+        try {
+            if (comment.user.toString() !== req.user._id.toString()) {
+                await new Notification({
+                    recipient: comment.user,
+                    sender: req.user._id,
+                    type: "reply",
+                    post: post._id
+                }).save();
+            }
+        } catch (notificationErr) {
+            console.error("Failed to create reply notification:", notificationErr);
+        }
 
         res.json(updatedPost.comments);
     } catch (err) {
@@ -293,6 +407,51 @@ router.delete("/:id", verifyToken, async (req, res) => {
         res.json({ message: "Post and associated file deleted successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// POST report a post
+router.post("/:id/report", verifyToken, async (req, res) => {
+    try {
+        const { reason } = req.body;
+        if (!reason) return res.status(400).json({ error: "Reason is required" });
+
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ error: "Post not found" });
+
+        // Add report
+        post.reports.push({
+            user: req.user._id,
+            reason
+        });
+
+        await post.save();
+        res.json({ message: "Post reported successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/posts/search → search posts by content or title
+router.get("/search", async (req, res) => {
+    try {
+        const { query } = req.query;
+        if (!query) return res.json([]);
+
+        const posts = await Post.find({
+            $or: [
+                { content: { $regex: query, $options: "i" } },
+                { title: { $regex: query, $options: "i" } },
+            ],
+        })
+            .populate("author", "name username avatarUrl profilePicture headline")
+            .limit(10)
+            .sort({ createdAt: -1 });
+
+        res.json(posts);
+    } catch (err) {
+        console.error("Post Search failed:", err);
+        res.status(500).json({ message: "Search failed" });
     }
 });
 

@@ -7,6 +7,16 @@ const { calculateContentSimilarity, calculateInteractionScore } = require("../ut
 
 // ... (lines 6-85 remain existing code, I will use precise targeting below instead of replacing whole file)
 
+// GET /api/users/count → fetch total user count
+router.get("/count", async (req, res) => {
+  try {
+    const count = await User.countDocuments({ username: { $exists: true, $ne: "" } });
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to count users" });
+  }
+});
+
 // GET /api/users/recent → fetch recent users for landing page
 router.get("/recent", async (req, res) => {
   try {
@@ -144,10 +154,20 @@ router.post("/unfollow/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// PUT /api/users/me → update current user profile
 router.put("/me", authMiddleware, async (req, res) => {
   try {
-    const updated = await User.findByIdAndUpdate(req.user.id, req.body, {
+    const allowedUpdates = [
+      "name", "firstName", "lastName", "bio", "avatarUrl", "linkedinUrl",
+      "location", "pronouns", "website", "calendarLink", "socialLinks",
+      "skills", "interests", "projects"
+    ];
+
+    const updates = {};
+    allowedUpdates.forEach(field => {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    });
+
+    const updated = await User.findByIdAndUpdate(req.user.id, updates, {
       new: true,
     });
     // Return consistent user object format (matching login response)

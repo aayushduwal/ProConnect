@@ -9,8 +9,11 @@ import {
   FaRegThumbsUp,
   FaShare,
   FaTrash,
+  FaFlag,
 } from "react-icons/fa";
 import { getUser } from "../utils/auth";
+import CommentSection from "./CommentSection";
+import ReportModal from "./ReportModal";
 
 export default function PostCard({ post }) {
   const user = getUser();
@@ -24,6 +27,8 @@ export default function PostCard({ post }) {
   );
   const [likeCount, setLikeCount] = useState(post.likes.length);
   const [showMenu, setShowMenu] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const handleLike = async () => {
     if (!user || !userId) return alert("Please log in to like.");
@@ -69,6 +74,30 @@ export default function PostCard({ post }) {
     } catch (err) {
       console.error("Delete failed", err);
       alert("Failed to delete post");
+    }
+  };
+
+  const handleReport = async (reason) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/${post._id}/report`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": userId
+        },
+        body: JSON.stringify({ reason }),
+      });
+
+      if (response.ok) {
+        setShowMenu(false);
+        return true;
+      } else {
+        alert("Failed to report post");
+        return false;
+      }
+    } catch (err) {
+      console.error("Report failed", err);
+      return false;
     }
   };
 
@@ -137,6 +166,37 @@ export default function PostCard({ post }) {
                         >
                           <FaTrash size={12} />
                           Delete Post
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Show report for non-authors */}
+              {userId && post.author._id?.toString() !== userId.toString() && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowMenu(!showMenu)}
+                    className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                    aria-label="Post options"
+                  >
+                    <FaEllipsisH className="text-gray-500" size={14} />
+                  </button>
+
+                  {showMenu && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+                      <div className="absolute right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20 min-w-[150px]">
+                        <button
+                          onClick={() => {
+                            setShowMenu(false);
+                            setShowReportModal(true);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                        >
+                          <FaFlag className="text-red-500" size={12} />
+                          Report Post
                         </button>
                       </div>
                     </>
@@ -215,11 +275,13 @@ export default function PostCard({ post }) {
         </button>
 
         <button
-          className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-          onClick={() => alert("Comments feature coming soon!")}
+          className={`flex items-center gap-2 text-sm font-medium transition-colors ${showComments ? "text-purple-600" : "text-gray-500 hover:text-gray-900"}`}
+          onClick={() => setShowComments(!showComments)}
         >
           <FaRegCommentDots size={18} />
-          <span className="text-xs">{post.comments?.length || 0}</span>
+          <span className="text-xs">
+            {(post.comments || []).reduce((acc, c) => acc + 1 + (c.replies?.length || 0), 0)}
+          </span>
         </button>
 
         <button
@@ -235,6 +297,19 @@ export default function PostCard({ post }) {
           <span className="text-xs">Share</span>
         </button>
       </div>
+
+      {/* Comment Section */}
+      {showComments && (
+        <CommentSection postId={post._id} initialComments={post.comments} />
+      )}
+
+      {/* Professional Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        onSubmit={handleReport}
+        postId={post._id}
+      />
     </div>
   );
 }

@@ -3,10 +3,8 @@ const User = require("../models/User");
 
 const adminMiddleware = async (req, res, next) => {
     try {
-        // req.user.id is usually set by an authMiddleware like JWT verification
-        const user = await User.findById(req.user.id);
-
-        if (!user || user.role !== "admin") {
+        // req.user is set by authMiddleware
+        if (!req.user || req.user.role !== "admin") {
             return res.status(403).json({ message: "Access denied. Admin role required." });
         }
 

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { getUser } from "../utils/auth";
 import NetworkModal from "./NetworkModal";
 
@@ -10,6 +11,7 @@ export default function SidebarLeft() {
     const [user, setUser] = useState(null);
     const [showNetworkModal, setShowNetworkModal] = useState(false);
     const [networkTab, setNetworkTab] = useState("followers");
+    const pathname = usePathname();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -67,26 +69,29 @@ export default function SidebarLeft() {
             {/* Navigation Items */}
             <div className="space-y-1 flex-1">
                 {[
-                    { name: "Scroll", icon: "🏠", active: true, href: "/scroll" },
-                    { name: "Launchpad", icon: "🚀", href: "#" },
+                    { name: "Scroll", icon: "🏠", href: "/scroll" },
+                    { name: "Launchpad", icon: "🚀", href: "/launchpad" },
                     { name: "Articles", icon: "✍️", href: "#" },
                     { name: "Jobs", icon: "💼", href: "#" },
                     { name: "Inbox", icon: "💬", href: "#" },
-                    { name: "Search", icon: "🔍", href: "#" },
+                    { name: "Search", icon: "🔍", href: "/search" },
                     ...(user?.role === "admin" ? [{ name: "Admin Panel", icon: "🛡️", href: "/admin" }] : []),
-                ].map((item) => (
-                    <Link
-                        key={item.name}
-                        href={item.href}
-                        className={`flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer transition-all ${item.active
-                            ? "text-gray-900 font-bold bg-gray-100/80"
-                            : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-medium"
-                            }`}
-                    >
-                        <span className="text-xl">{item.icon}</span>
-                        <span className="text-sm">{item.name}</span>
-                    </Link>
-                ))}
+                ].map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                        <Link
+                            key={item.name}
+                            href={item.href}
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer transition-all ${isActive
+                                ? "text-gray-900 font-bold bg-gray-100/80 shadow-sm"
+                                : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-medium"
+                                }`}
+                        >
+                            <span className="text-xl">{item.icon}</span>
+                            <span className="text-sm">{item.name}</span>
+                        </Link>
+                    );
+                })}
             </div>
 
             {/* Mini Profile Section */}

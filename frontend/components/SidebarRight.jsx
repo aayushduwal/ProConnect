@@ -266,7 +266,7 @@ export default function SidebarRight({ children }) {
                     <span className="cursor-pointer hover:text-gray-600">Privacy</span> •
                     <span className="cursor-pointer hover:text-gray-600">Terms</span> •
                     <span className="cursor-pointer hover:text-gray-600">About</span> •
-                    <span>© 2025 ProConnect</span>
+                    <span>© {new Date().getFullYear()} ProConnect</span>
                 </div>
             </div>
         </div>

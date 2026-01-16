@@ -58,11 +58,36 @@ const postSchema = new mongoose.Schema(
                     required: true,
                     trim: true,
                 },
+                replies: [
+                    {
+                        user: {
+                            type: mongoose.Schema.Types.ObjectId,
+                            ref: "User",
+                            required: true,
+                        },
+                        text: {
+                            type: String,
+                            required: true,
+                            trim: true,
+                        },
+                        createdAt: {
+                            type: Date,
+                            default: Date.now,
+                        },
+                    }
+                ],
                 createdAt: {
                     type: Date,
                     default: Date.now,
                 },
             },
+        ],
+        reports: [
+            {
+                user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+                reason: { type: String, trim: true },
+                createdAt: { type: Date, default: Date.now }
+            }
         ],
     },
     { timestamps: true }

@@ -186,7 +186,12 @@ export default function NotificationMenu({ onClose }) {
                                             <Link href={`/u/${notif.sender?.username}`} className="font-bold hover:underline">
                                                 {notif.sender?.name}
                                             </Link>
-                                            <span className="text-gray-500"> followed you.</span>
+                                            <span className="text-gray-500">
+                                                {notif.type === 'follow' && " followed you."}
+                                                {notif.type === 'like' && " liked your post."}
+                                                {notif.type === 'comment' && " commented on your post."}
+                                                {notif.type === 'reply' && " replied to your comment."}
+                                            </span>
                                         </p>
                                         <p className="text-xs text-gray-400 mt-1">
                                             {new Date(notif.createdAt).toLocaleDateString()}
