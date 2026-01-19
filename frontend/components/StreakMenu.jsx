@@ -1,7 +1,5 @@
-"use client";
-import { useState, useEffect } from "react";
+import api from "../lib/api";
 import { FaFire } from "react-icons/fa";
-import { getToken } from "../utils/auth";
 
 export default function StreakMenu({ onClose }) {
     const [streakData, setStreakData] = useState({
@@ -16,20 +14,9 @@ export default function StreakMenu({ onClose }) {
     }, []);
 
     const fetchStreak = async () => {
-        const token = getToken();
-        if (!token) {
-            setLoading(false);
-            return;
-        }
-
         try {
-            const res = await fetch("http://localhost:5000/api/streak", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setStreakData(data);
-            }
+            const res = await api.get("/streak");
+            setStreakData(res.data);
         } catch (err) {
             console.error("Failed to fetch streak:", err);
         } finally {

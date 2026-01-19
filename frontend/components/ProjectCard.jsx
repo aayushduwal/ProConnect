@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { FaChevronUp, FaExternalLinkAlt } from "react-icons/fa";
 import { getToken, getUser } from "../utils/auth";
 
@@ -22,11 +22,7 @@ export default function ProjectCard({ project, rank, onUpdate }) {
 
         setUpvoting(true);
         try {
-            await axios.post(
-                `http://localhost:5000/api/projects/${project._id}/upvote`,
-                {},
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await api.post(`/projects/${project._id}/upvote`, {});
             onUpdate();
         } catch (err) {
             console.error("Upvote failed", err);
@@ -85,8 +81,8 @@ export default function ProjectCard({ project, rank, onUpdate }) {
                 onClick={handleUpvote}
                 disabled={upvoting}
                 className={`flex flex-col items-center justify-center w-14 h-14 rounded-xl border transition-all ${isUpvoted
-                        ? "bg-green-50 border-green-200 text-green-700 shadow-sm"
-                        : "bg-white border-gray-100 text-gray-400 hover:border-green-200 hover:bg-gray-50"
+                    ? "bg-green-50 border-green-200 text-green-700 shadow-sm"
+                    : "bg-white border-gray-100 text-gray-400 hover:border-green-200 hover:bg-gray-50"
                     } ${upvoting ? "opacity-50" : ""}`}
             >
                 <FaChevronUp size={14} className={upvoting ? "animate-bounce" : ""} />

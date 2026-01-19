@@ -1,5 +1,4 @@
-"use client";
-
+import api from "../lib/api";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -37,33 +36,19 @@ export default function SidebarRight({ children }) {
     }, []);
 
     const fetchUnreadCount = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
         try {
-            const res = await fetch("http://localhost:5000/api/notifications", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                const unread = data.filter(n => !n.read).length;
-                setUnreadCount(unread);
-            }
+            const res = await api.get("/notifications");
+            const unread = res.data.filter(n => !n.read).length;
+            setUnreadCount(unread);
         } catch (err) {
             console.error("Failed to fetch notifications", err);
         }
     };
 
     const fetchStreakCount = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
         try {
-            const res = await fetch("http://localhost:5000/api/streak", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setStreakCount(data.streakCount || 0);
-            }
+            const res = await api.get("/streak");
+            setStreakCount(res.data.streakCount || 0);
         } catch (err) {
             console.error("Failed to fetch streak", err);
         }
@@ -91,12 +76,9 @@ export default function SidebarRight({ children }) {
             if (searchQuery.trim().length > 0) {
                 setIsSearching(true);
                 try {
-                    const res = await fetch(`http://localhost:5000/api/users/search?query=${searchQuery}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        setSearchResults(data);
-                        setShowResults(true);
-                    }
+                    const res = await api.get(`/users/search?query=${searchQuery}`);
+                    setSearchResults(res.data);
+                    setShowResults(true);
                 } catch (error) {
                     console.error("Search failed:", error);
                 } finally {
