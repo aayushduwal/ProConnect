@@ -1,11 +1,12 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 import { FaUpload, FaTimes, FaUser, FaJava, FaVuejs, FaGithub } from "react-icons/fa";
 import { FaTwitter, FaInstagram, FaFigma, FaProductHunt, FaBehance, FaTiktok, FaYoutube, FaMastodon, FaCode } from "react-icons/fa";
 import { SiWellfound, SiThreads, SiJavascript, SiTypescript, SiPython, SiReact, SiNextdotjs, SiNodedotjs, SiHtml5, SiCss3, SiDocker, SiAmazon, SiGo, SiRust, SiKotlin, SiSwift, SiFlutter, SiMongodb, SiPostgresql, SiTailwindcss, SiGit, SiMysql, SiFirebase, SiSupabase, SiGraphql, SiRedux, SiSvelte, SiAngular, SiCplusplus, SiDotnet, SiPhp, SiRuby, SiLaravel, SiSpring, SiDjango, SiFlask } from "react-icons/si";
-import { getSkillIcon, formatDisplayName } from "../../utils/skillUtils";
+import { getSkillIcon, formatDisplayName as utilsFormatDisplayName } from "../../utils/skillUtils";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function ProfileSettingsPage() {
   const [user, setUser] = useState(null);
@@ -86,47 +87,43 @@ export default function ProfileSettingsPage() {
 
   useEffect(() => {
     // Fetch user data
-    const token = localStorage.getItem("token");
-    if (token) {
-      axios.get("http://localhost:5000/api/users/me", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then(res => {
-          const data = res.data;
-          setUser(data);
-          // Parse name
-          const [first, ...rest] = (data.name || "").split(" ");
+    api.get("/users/me")
+      .then(res => {
+        const data = res.data;
+        setUser(data);
+        // Parse name
+        const [first, ...rest] = (data.name || "").split(" ");
 
-          setFormData({
-            firstName: data.firstName || first || "",
-            lastName: data.lastName || rest.join(" ") || "",
-            bio: data.bio || "",
-            location: data.location || "",
-            pronouns: data.pronouns || "",
-            website: data.website || "",
-            calendarLink: data.calendarLink || "",
-            socialLinks: {
-              twitter: data.socialLinks?.twitter || "",
-              instagram: data.socialLinks?.instagram || "",
-              figma: data.socialLinks?.figma || "",
-              producthunt: data.socialLinks?.producthunt || "",
-              wellfound: data.socialLinks?.wellfound || "",
-              behance: data.socialLinks?.behance || "",
-              mastodon: data.socialLinks?.mastodon || "",
-              tiktok: data.socialLinks?.tiktok || "",
-              youtube: data.socialLinks?.youtube || "",
-              threads: data.socialLinks?.threads || "",
-            }
-          });
-          setLocationQuery(data.location || "");
-          if (data.skills && Array.isArray(data.skills)) {
-            setFormData(prev => ({ ...prev, skills: data.skills }));
+        setFormData({
+          firstName: data.firstName || first || "",
+          lastName: data.lastName || rest.join(" ") || "",
+          bio: data.bio || "",
+          location: data.location || "",
+          pronouns: data.pronouns || "",
+          website: data.website || "",
+          calendarLink: data.calendarLink || "",
+          socialLinks: {
+            twitter: data.socialLinks?.twitter || "",
+            instagram: data.socialLinks?.instagram || "",
+            figma: data.socialLinks?.figma || "",
+            producthunt: data.socialLinks?.producthunt || "",
+            wellfound: data.socialLinks?.wellfound || "",
+            behance: data.socialLinks?.behance || "",
+            mastodon: data.socialLinks?.mastodon || "",
+            tiktok: data.socialLinks?.tiktok || "",
+            youtube: data.socialLinks?.youtube || "",
+            threads: data.socialLinks?.threads || "",
+            github: data.socialLinks?.github || ""
           }
-          setAvatarUrl(data.avatarUrl || data.profilePicture || "");
-        })
-        .catch(err => console.error(err))
-        .finally(() => setLoading(false));
-    }
+        });
+        setLocationQuery(data.location || "");
+        if (data.skills && Array.isArray(data.skills)) {
+          setFormData(prev => ({ ...prev, skills: data.skills }));
+        }
+        setAvatarUrl(data.avatarUrl || data.profilePicture || "");
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
 
     // Fetch popular skills from StackOverflow for "Suggested" section
     axios.get("https://api.stackexchange.com/2.3/tags?order=desc&sort=popular&site=stackoverflow&pagesize=15")
@@ -255,7 +252,7 @@ export default function ProfileSettingsPage() {
     uploadData.append("file", file);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/upload", uploadData, {
+      const res = await api.post("/upload", uploadData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       setAvatarUrl(res.data.url);
@@ -269,7 +266,6 @@ export default function ProfileSettingsPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    const token = localStorage.getItem("token");
     try {
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
       const payload = {
@@ -278,9 +274,7 @@ export default function ProfileSettingsPage() {
         avatarUrl
       };
 
-      await axios.put("http://localhost:5000/api/users/me", payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.put("/users/me", payload);
 
       // Update local user if needed
       const currentUser = JSON.parse(localStorage.getItem("user") || "{}");

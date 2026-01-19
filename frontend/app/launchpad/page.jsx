@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 import { FaRocket, FaPlus, FaSortAmountDown } from "react-icons/fa";
 import ProjectCard from "../../components/ProjectCard";
 import LaunchProjectModal from "../../components/LaunchProjectModal";
@@ -21,7 +21,7 @@ export default function LaunchpadPage() {
     const fetchProjects = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("http://localhost:5000/api/projects");
+            const res = await api.get("/projects");
             setProjects(res.data);
         } catch (err) {
             console.error("Failed to fetch projects", err);

@@ -1,5 +1,4 @@
-"use client";
-import axios from "axios";
+import api from "../../lib/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 
@@ -16,17 +15,10 @@ export default function CompleteProfile() {
   const fileInputRef = useRef(null);
 
   const router = useRouter();
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   // ✅ Auto-fetch user data when page loads
   useEffect(() => {
-    if (!token) return;
-
-    axios
-      .get("http://localhost:5000/api/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    api.get("/users/me")
       .then((res) => {
         const user = res.data;
         if (user.name) {
@@ -40,7 +32,7 @@ export default function CompleteProfile() {
         if (user.avatarUrl) setAvatarUrl(user.avatarUrl);
       })
       .catch((err) => console.error("❌ Failed to load user data:", err));
-  }, [token]);
+  }, []);
 
   // ✅ Handle Image Upload
   const handleImageUpload = async (e) => {
@@ -52,7 +44,7 @@ export default function CompleteProfile() {
     formData.append("file", file);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/upload", formData, {
+      const res = await api.post("/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -70,11 +62,6 @@ export default function CompleteProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!token) {
-      alert("You must be logged in!");
-      return;
-    }
-
     if (!firstName || !lastName || !bio || !username) {
       alert("Please fill in your first name, last name, bio, and username!");
       return;
@@ -82,16 +69,15 @@ export default function CompleteProfile() {
 
     setLoading(true);
     try {
-      const res = await axios.put(
-        "http://localhost:5000/api/users/me",
+      const res = await api.put(
+        "/users/me",
         {
           name: `${firstName.trim()} ${lastName.trim()}`,
           bio: bio.trim(),
           username: username.trim(),
           linkedinUrl: linkedinUrl.trim(),
           avatarUrl: avatarUrl,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+        }
       );
 
       console.log("✅ Profile updated:", res.data);
