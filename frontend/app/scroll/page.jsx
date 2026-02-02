@@ -16,7 +16,7 @@ export default function ScrollPage() {
   const [initialMediaType, setInitialMediaType] = useState(null);
 
   // Header States
-  const [activeTab, setActiveTab] = useState("trending"); // newest, trending, following
+  const [activeTab, setActiveTab] = useState("feed"); // feed, following
 
   useEffect(() => {
     const currentUser = getUser();
@@ -30,7 +30,7 @@ export default function ScrollPage() {
     window.addEventListener("openCreatePostModal", handleOpenModal);
 
     return () => window.removeEventListener("openCreatePostModal", handleOpenModal);
-  }, []);
+  }, [activeTab]);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -44,7 +44,8 @@ export default function ScrollPage() {
         headers['x-user-id'] = userId;
       }
 
-      const res = await fetch("http://localhost:5000/api/posts", { headers });
+      const endpoint = activeTab === "following" ? "/following" : "";
+      const res = await fetch(`http://localhost:5000/api/posts${endpoint}`, { headers });
       const data = await res.json();
       if (Array.isArray(data)) {
         setPosts(data);
@@ -85,26 +86,17 @@ export default function ScrollPage() {
         <div className="flex-1 flex justify-center">
           <div className="flex bg-white p-1 rounded-full border border-gray-200 shadow-sm overflow-x-auto no-scrollbar">
             <button
-              onClick={() => setActiveTab("newest")}
-              className={`px-4 md:px-5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${activeTab === "newest"
+              onClick={() => setActiveTab("feed")}
+              className={`px-6 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${activeTab === "feed"
                 ? "bg-green-50 text-green-700 shadow-sm"
                 : "text-gray-500 hover:bg-gray-50"
                 }`}
             >
-              NEWEST
-            </button>
-            <button
-              onClick={() => setActiveTab("trending")}
-              className={`px-4 md:px-5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${activeTab === "trending"
-                ? "bg-green-50 text-green-700 shadow-sm"
-                : "text-gray-500 hover:bg-gray-50"
-                }`}
-            >
-              TRENDING
+              FEED
             </button>
             <button
               onClick={() => setActiveTab("following")}
-              className={`px-4 md:px-5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${activeTab === "following"
+              className={`px-6 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${activeTab === "following"
                 ? "bg-green-50 text-green-700 shadow-sm"
                 : "text-gray-500 hover:bg-gray-50"
                 }`}

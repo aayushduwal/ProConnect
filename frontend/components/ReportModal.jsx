@@ -10,8 +10,10 @@ export default function ReportModal({ isOpen, onClose, onSubmit, postId }) {
     const reasons = [
         { id: "Spam", title: "Spam", desc: "The post contains content that is massively posted or otherwise misleading in nature." },
         { id: "Unprofessional", title: "Unprofessional", desc: "The content is the post not suitable for a professional social network." },
+        { id: "Irrelevant", title: "Irrelevant", desc: "The post is irrelevant to me." },
         { id: "Sexual Content", title: "Sexual Content", desc: "Content that includes graphic sexual activity, nudity, or other types of sexual content." },
-        { id: "Irrelevant", title: "Irrelevant", desc: "The post is irrelevant to me." }
+        { id: "Harassment", title: "Harassment", desc: "Attacks or intimidation toward others with abusive language or deliberately and repeatedly disrupting conversations, including revealing others’ personal or sensitive information. This includes unwanted romantic advances, sexual remarks and or requests for sexual favors." },
+        { id: "Misinformation", title: "Misinformation", desc: "False content or information, including news stories, that present untrue facts or events as though they are true or likely to be true." }
     ];
 
     const toggleReason = (id) => {

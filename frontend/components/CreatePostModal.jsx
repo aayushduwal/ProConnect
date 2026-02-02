@@ -3,6 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { FaTimes, FaGlobeAmericas, FaImage, FaVideo, FaPoll, FaBook, FaSmile, FaHistory, FaTrash, FaUpload } from "react-icons/fa";
+import dynamic from "next/dynamic";
+
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 
 export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, initialMediaType }) {
     const [content, setContent] = useState("");
@@ -20,6 +23,13 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
     const [pollQuestion, setPollQuestion] = useState("");
     const [pollOptions, setPollOptions] = useState(["", ""]);
 
+    // Category State
+    const [category, setCategory] = useState("General");
+    const categories = ["General", "Technology", "Design", "Marketing", "Business", "Development", "Education", "Health"];
+
+    // Emoji Picker State
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
     // Rotating placeholder text
     const placeholders = [
         "What are you working on?",
@@ -32,6 +42,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
 
     const textareaRef = useRef(null);
     const fileInputRef = useRef(null);
+    const emojiPickerRef = useRef(null);
 
     // Rotate placeholder text every 3 seconds
     useEffect(() => {
@@ -48,6 +59,19 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
             textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
         }
     }, [content]);
+
+    // Close emoji picker when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+                setShowEmojiPicker(false);
+            }
+        };
+        if (showEmojiPicker) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [showEmojiPicker]);
 
     // Load Draft on Open
     useEffect(() => {
@@ -77,6 +101,11 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
             setMediaType('none');
         }
     }, [isOpen, initialMediaType]);
+
+    const handleEmojiClick = (emojiData) => {
+        setContent((prev) => prev + emojiData.emoji);
+        setShowEmojiPicker(false);
+    };
 
     const handleFileSelect = async (e) => {
         const file = e.target.files[0];
@@ -112,10 +141,14 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
     };
 
     const handlePost = async () => {
-        if (!content && !mediaUrl) return;
+        // Validate: need either content or poll
+        if (!content && !pollQuestion) return;
+        if (pollQuestion && pollOptions.filter(opt => opt.trim()).length < 2) {
+            alert("Poll must have at least 2 options");
+            return;
+        }
 
         console.log("Attempting to post with user:", user);
-        // Support both _id (mongoose default) and id (mapped in auth response)
         const userId = user?._id || user?.id;
 
         if (!userId) {
@@ -127,17 +160,28 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
         setLoading(true);
 
         try {
+            const body = {
+                content,
+                mediaUrl,
+                mediaType: mediaUrl ? mediaType : 'none',
+                category
+            };
+
+            // Add poll if present
+            if (pollQuestion) {
+                body.poll = {
+                    question: pollQuestion,
+                    options: pollOptions.filter(opt => opt.trim())
+                };
+            }
+
             const res = await fetch("http://localhost:5000/api/posts", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "x-user-id": userId
                 },
-                body: JSON.stringify({
-                    content,
-                    mediaUrl,
-                    mediaType: mediaUrl ? mediaType : 'none'
-                })
+                body: JSON.stringify(body)
             });
 
             if (res.ok) {
@@ -160,7 +204,10 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
             setLoading(false);
             setContent("");
             setMediaUrl("");
+            setPollQuestion("");
+            setPollOptions(["", ""]);
             setShowMediaInput(false);
+            setShowPollInput(false);
             localStorage.removeItem("post_draft");
             onClose();
         }
@@ -201,7 +248,23 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                 <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
                             )}
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 space-y-4">
+                            {/* Category Selector */}
+                            <div className="flex items-center gap-2 mb-2 overflow-x-auto pb-2 scrollbar-hide">
+                                {categories.map((cat) => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setCategory(cat)}
+                                        className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap border transition-all ${category === cat
+                                            ? "bg-purple-600 text-white border-purple-600 shadow-sm"
+                                            : "bg-purple-50 text-purple-700 border-purple-100 hover:bg-purple-100"
+                                            }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+
                             <textarea
                                 ref={textareaRef}
                                 value={content}
@@ -275,7 +338,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                     {showPollInput && (
                         <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100 animate-in fade-in slide-in-from-top-2">
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium text-gray-600">Create a Poll</span>
+                                <span className="text-sm font-medium text-gray-900">Create a Poll</span>
                                 <button onClick={() => setShowPollInput(false)} className="text-red-500 hover:bg-red-50 p-1 rounded">
                                     <FaTimes size={14} />
                                 </button>
@@ -284,7 +347,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                 type="text"
                                 value={pollQuestion}
                                 onChange={(e) => setPollQuestion(e.target.value)}
-                                className="w-full p-2 border border-gray-200 rounded-lg outline-none focus:border-black mb-2"
+                                className="w-full p-2 border border-gray-200 rounded-lg outline-none focus:border-black mb-2 text-gray-900"
                                 placeholder="Ask a question..."
                             />
                             {/* Simple placeholders for options */}
@@ -293,10 +356,22 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                     <input
                                         key={idx}
                                         type="text"
-                                        className="w-full p-2 border border-gray-200 rounded-lg bg-white text-sm"
+                                        value={opt}
+                                        onChange={(e) => {
+                                            const newOptions = [...pollOptions];
+                                            newOptions[idx] = e.target.value;
+                                            setPollOptions(newOptions);
+                                        }}
+                                        className="w-full p-2 border border-gray-200 rounded-lg bg-white text-sm outline-none focus:border-black text-gray-900"
                                         placeholder={`Option ${idx + 1}`}
                                     />
                                 ))}
+                                <button
+                                    onClick={() => setPollOptions([...pollOptions, ""])}
+                                    className="text-sm text-gray-500 hover:text-gray-900 font-medium"
+                                >
+                                    + Add Option
+                                </button>
                             </div>
                         </div>
                     )}
@@ -331,9 +406,21 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                 <FaBook size={18} />
                             </button>
                             <div className="w-px h-6 bg-gray-300 mx-1"></div>
-                            <button className="p-2 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors" title="Emoji">
-                                <FaSmile size={18} />
-                            </button>
+                            <div className="relative" ref={emojiPickerRef}>
+                                <button
+                                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                    className={`p-2 rounded-lg transition-colors ${showEmojiPicker ? "bg-yellow-100 text-yellow-700" : "hover:bg-gray-200 text-gray-600"}`}
+                                    title="Emoji"
+                                    type="button"
+                                >
+                                    <FaSmile size={18} />
+                                </button>
+                                {showEmojiPicker && (
+                                    <div className="absolute bottom-12 left-0 z-50 shadow-2xl rounded-lg overflow-hidden">
+                                        <EmojiPicker onEmojiClick={handleEmojiClick} width={320} height={400} />
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="flex items-center gap-3">
@@ -342,7 +429,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                             </span>
                             <button
                                 onClick={handlePost}
-                                disabled={!content && !mediaUrl}
+                                disabled={!content && !mediaUrl && !pollQuestion}
                                 className="px-6 py-2 bg-green-600 text-white rounded-full font-bold text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-green-200"
                             >
                                 {loading ? "Posting..." : "Post"}

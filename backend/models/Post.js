@@ -9,7 +9,7 @@ const postSchema = new mongoose.Schema(
         },
         content: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
             maxLength: 2000,
         },
@@ -38,7 +38,7 @@ const postSchema = new mongoose.Schema(
         saves: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
         poll: {
             question: String,
-            options: [{ text: String, votes: { type: Number, default: 0 } }]
+            options: [{ text: String, voters: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] }]
         },
         likes: [
             {

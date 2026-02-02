@@ -7,16 +7,44 @@ const fs = require("fs");
 const path = require("path");
 const { calculateContentSimilarity, calculateInteractionScore } = require("../utils/recommendationUtils");
 
-// Helper middleware to get user from request (assuming auth middleware sets req.user or we verify token here)
-// For now, we will assume the frontend sends the user ID in the headers or body since we are using Firebase token verification
-// Ideally, we should use the auth middleware we created earlier.
+// Helper middleware to get user from request
 const verifyToken = async (req, res, next) => {
-    // SIMPLE AUTH for now: Getting 'x-user-id' from header or handle Firebase token
-    // In a real app, use the verifyToken middleware from auth.js
-    const userId = req.headers['x-user-id'];
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
-    req.user = { _id: userId };
-    next();
+    try {
+        const authHeader = req.headers.authorization;
+        const xUserId = req.headers['x-user-id'];
+
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            const token = authHeader.split(" ")[1];
+            const jwt = require("jsonwebtoken");
+            const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
+
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+                const User = require("../models/User");
+                const user = await User.findById(decoded.id);
+                if (user) {
+                    req.user = user;
+                    return next();
+                }
+            } catch (jwtErr) {
+                console.warn("JWT verification failed, falling back to x-user-id:", jwtErr.message);
+            }
+        }
+
+        if (xUserId) {
+            const User = require("../models/User");
+            const user = await User.findById(xUserId);
+            if (user) {
+                req.user = user;
+                return next();
+            }
+        }
+
+        return res.status(401).json({ error: "Unauthorized" });
+    } catch (err) {
+        console.error("verifyToken error:", err);
+        res.status(401).json({ error: "Unauthorized" });
+    }
 };
 
 // GET all posts (Hybrid Recommendation System)
@@ -55,25 +83,38 @@ router.get("/", async (req, res) => {
 
             const contentSimilarity = calculateContentSimilarity(userContentBase, itemContentBase);
 
-            // B. Interaction Score (Weighted Signals)
-            const interactionScore = calculateInteractionScore(post, {
-                views: 0.1,
-                likes: 0.3,
-                saves: 0.4,
-                follows: 0.0 // Posts don't have followers, but could use author's followers
-            });
+            // B. Interaction Score (New Points System)
+            // Likes: 3 pts, Comments: 5 pts, Views: 0.1 pts
+            const likesCount = (post.likes && post.likes.length) || 0;
+            const commentsCount = (post.comments && post.comments.length) || 0;
+            const viewsCount = (post.views && post.views.length) || 0;
 
-            // C. Combined Final Score
-            // Combine both factors. Content similarity is normalized [0,1], 
-            // interaction score is raw (can be boosted/normalized as needed).
-            // We give content similarity a high impact by multiplying or adding with a base.
-            const finalScore = (contentSimilarity * 10) + interactionScore;
+            const interactionScore =
+                (likesCount * 3) +
+                (commentsCount * 5) +
+                (viewsCount * 0.1);
 
-            // Optional: Time Decay (Optional: fresher posts get slight boost)
-            const daysOld = (new Date() - new Date(post.createdAt)) / (1000 * 60 * 60 * 24);
-            const decayedScore = finalScore / (1 + daysOld * 0.1);
+            // C. Freshness Score (Kickstart Bonus)
+            // 24 points max, -1 per hour. +10 Turbo Boost if < 1 hour.
+            const now = new Date();
+            const postDate = new Date(post.createdAt);
+            const hoursOld = (now - postDate) / (1000 * 60 * 60);
 
-            return { ...post, score: decayedScore, debug: { contentSimilarity, interactionScore } };
+            let freshnessScore = Math.max(0, 24 - hoursOld);
+            if (hoursOld < 1) {
+                freshnessScore += 10; // Turbo boost for brand new posts
+            }
+
+            // D. Combined Final Score
+            // SkillMatch (0-10) + Interaction + Freshness
+            const skillScore = contentSimilarity * 10;
+            const finalScore = skillScore + interactionScore + freshnessScore;
+
+            return {
+                ...post,
+                score: finalScore,
+                debug: { skillScore, interactionScore, freshnessScore }
+            };
         });
 
         // --- 3. SORT & RETURN ---
@@ -82,6 +123,47 @@ router.get("/", async (req, res) => {
         res.json(scoredPosts);
     } catch (err) {
         console.error("Recommendation Error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/posts/search -> search posts by content or title
+router.get("/search", async (req, res) => {
+    try {
+        const { query } = req.query;
+        if (!query) return res.json([]);
+
+        const posts = await Post.find({
+            $or: [
+                { content: { $regex: query, $options: "i" } },
+                { title: { $regex: query, $options: "i" } },
+            ],
+        })
+            .populate("author", "name username avatarUrl profilePicture headline")
+            .limit(10)
+            .sort({ createdAt: -1 });
+
+        res.json(posts);
+    } catch (err) {
+        console.error("Post Search failed:", err);
+        res.status(500).json({ message: "Search failed" });
+    }
+});
+
+// GET posts from followed users
+router.get("/following", verifyToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        const posts = await Post.find({ author: { $in: user.following } })
+            .populate("author", "name avatarUrl username headline")
+            .populate("comments.user", "name avatarUrl username")
+            .populate("comments.replies.user", "name avatarUrl username")
+            .sort({ createdAt: -1 });
+
+        res.json(posts);
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
@@ -100,22 +182,41 @@ router.get("/user/:userId", async (req, res) => {
     }
 });
 
+// GET a single post by ID
+router.get("/:id", async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id)
+            .populate("author", "name avatarUrl username headline")
+            .populate("comments.user", "name avatarUrl username")
+            .populate("comments.replies.user", "name avatarUrl username");
+
+        if (!post) {
+            return res.status(404).json({ error: "Post not found" });
+        }
+        res.json(post);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // POST create a new post
 router.post("/", verifyToken, async (req, res) => {
     try {
-        const { content, title, image, mediaType, mediaUrl, skills, technologies, category } = req.body;
+        const { content, title, image, mediaType, mediaUrl, skills, technologies, category, poll } = req.body;
 
         // Check if banned
         if (req.user.status === "banned") {
             return res.status(403).json({ error: "Your account has been suspended for violating community guidelines." });
         }
 
-        // Validate
-        if (!content) return res.status(400).json({ error: "Content is required" });
+        // Validate - either content or poll must be present
+        if (!content && !poll?.question) {
+            return res.status(400).json({ error: "Content or poll is required" });
+        }
 
         const newPost = new Post({
             author: req.user._id, // Assumes auth middleware populates req.user
-            content,
+            content: content || "", // Allow empty content if poll exists
             title,
             image, // Legacy
             mediaType: mediaType || (image ? 'image' : 'none'),
@@ -123,6 +224,10 @@ router.post("/", verifyToken, async (req, res) => {
             skills,
             technologies,
             category,
+            poll: poll ? {
+                question: poll.question,
+                options: poll.options.map(opt => ({ text: opt, voters: [] }))
+            } : undefined
         });
 
         const savedPost = await newPost.save();
@@ -232,6 +337,58 @@ router.put("/:id/like", verifyToken, async (req, res) => {
 
         res.json(post.likes);
     } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PUT Vote on a poll
+router.put("/:id/vote", verifyToken, async (req, res) => {
+    try {
+        const { optionIndex } = req.body;
+        const userId = req.user._id;
+
+        if (optionIndex === undefined || optionIndex === null) {
+            return res.status(400).json({ error: "Option index is required" });
+        }
+
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ error: "Post not found" });
+        if (!post.poll || !post.poll.options) {
+            return res.status(400).json({ error: "This post does not have a poll" });
+        }
+
+        if (optionIndex < 0 || optionIndex >= post.poll.options.length) {
+            return res.status(400).json({ error: "Invalid option index" });
+        }
+
+        // Check if user has already voted for ANY option
+        let existingOptionIndex = -1;
+        post.poll.options.forEach((opt, idx) => {
+            if (opt.voters.some(v => v.toString() === userId.toString())) {
+                existingOptionIndex = idx;
+            }
+        });
+
+        if (existingOptionIndex === optionIndex) {
+            // User clicked the same option -> UNDO vote
+            post.poll.options[optionIndex].voters = post.poll.options[optionIndex].voters.filter(
+                v => v.toString() !== userId.toString()
+            );
+        } else {
+            // Remove from existing if they voted elsewhere
+            if (existingOptionIndex !== -1) {
+                post.poll.options[existingOptionIndex].voters = post.poll.options[existingOptionIndex].voters.filter(
+                    v => v.toString() !== userId.toString()
+                );
+            }
+            // Add to new option
+            post.poll.options[optionIndex].voters.push(userId);
+        }
+
+        await post.save();
+        res.json(post.poll);
+    } catch (err) {
+        console.error("Vote error:", err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -432,27 +589,6 @@ router.post("/:id/report", verifyToken, async (req, res) => {
     }
 });
 
-// GET /api/posts/search → search posts by content or title
-router.get("/search", async (req, res) => {
-    try {
-        const { query } = req.query;
-        if (!query) return res.json([]);
 
-        const posts = await Post.find({
-            $or: [
-                { content: { $regex: query, $options: "i" } },
-                { title: { $regex: query, $options: "i" } },
-            ],
-        })
-            .populate("author", "name username avatarUrl profilePicture headline")
-            .limit(10)
-            .sort({ createdAt: -1 });
-
-        res.json(posts);
-    } catch (err) {
-        console.error("Post Search failed:", err);
-        res.status(500).json({ message: "Search failed" });
-    }
-});
 
 module.exports = router;
