@@ -52,10 +52,10 @@ export default function Header() {
           <Link href="/scroll" className="hover:text-gray-900 transition-colors">
             Scroll
           </Link>
-          <Link href="#jobs" className="hover:text-gray-900 transition-colors">
+          <Link href="#" className="hover:text-gray-900 transition-colors">
             Jobs
           </Link>
-          <Link href="#launchpad" className="hover:text-gray-900 transition-colors">
+          <Link href="/launchpad" className="hover:text-gray-900 transition-colors">
             Launchpad
           </Link>
         </div>
@@ -157,14 +157,14 @@ export default function Header() {
       {/* Mobile Menu Overlay */}
       {openMobileMenu && (
         <div className="md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-md absolute w-full shadow-lg p-4 space-y-4 animate-in slide-in-from-top-2">
-          <Link href="#scroll" className="block text-gray-600 hover:text-gray-900 py-2">Scroll</Link>
-          <Link href="#jobs" className="block text-gray-600 hover:text-gray-900 py-2">Jobs</Link>
-          <Link href="#launchpad" className="block text-gray-600 hover:text-gray-900 py-2">Launchpad</Link>
+          <Link href="/scroll" className="block text-gray-600 hover:text-gray-900 py-2" onClick={() => setOpenMobileMenu(false)}>Scroll</Link>
+          <Link href="#" className="block text-gray-600 hover:text-gray-900 py-2" onClick={() => setOpenMobileMenu(false)}>Jobs</Link>
+          <Link href="/launchpad" className="block text-gray-600 hover:text-gray-900 py-2" onClick={() => setOpenMobileMenu(false)}>Launchpad</Link>
           <hr className="border-gray-100" />
           {!user && (
             <div className="grid grid-cols-2 gap-3 pt-2">
-              <Link href="/login" className="text-center py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-700">Log In</Link>
-              <Link href="/signup" className="text-center py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium">Sign Up</Link>
+              <Link href="/login" className="text-center py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-700" onClick={() => setOpenMobileMenu(false)}>Log In</Link>
+              <Link href="/signup" className="text-center py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium" onClick={() => setOpenMobileMenu(false)}>Sign Up</Link>
             </div>
           )}
         </div>

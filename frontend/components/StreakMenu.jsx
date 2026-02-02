@@ -1,4 +1,5 @@
 import api from "../lib/api";
+import { useState, useEffect } from "react";
 import { FaFire } from "react-icons/fa";
 
 export default function StreakMenu({ onClose }) {

@@ -5,6 +5,15 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { getUser } from "../utils/auth";
 import NetworkModal from "./NetworkModal";
+import {
+    HiOutlineHome,
+    HiOutlineRocketLaunch,
+    HiOutlinePencil,
+    HiOutlineBriefcase,
+    HiOutlineChatBubbleLeft,
+    HiOutlineMagnifyingGlass,
+    HiOutlineShieldCheck
+} from "react-icons/hi2";
 
 export default function SidebarLeft() {
     const [user, setUser] = useState(null);
@@ -58,26 +67,27 @@ export default function SidebarLeft() {
                 {/* Navigation Items */}
                 <div className="space-y-1">
                     {[
-                        { name: "Scroll", icon: "🏠", href: "/scroll" },
-                        { name: "Launchpad", icon: "🚀", href: "/launchpad" },
-                        { name: "Articles", icon: "✍️", href: "#" },
-                        { name: "Jobs", icon: "💼", href: "#" },
-                        { name: "Inbox", icon: "💬", href: "#" },
-                        { name: "Search", icon: "🔍", href: "/search" },
-                        ...(user?.role === "admin" ? [{ name: "Admin Panel", icon: "🛡️", href: "/admin" }] : []),
+                        { name: "Scroll", icon: HiOutlineHome, href: "/scroll" },
+                        { name: "Launchpad", icon: HiOutlineRocketLaunch, href: "/launchpad" },
+                        { name: "Articles", icon: HiOutlinePencil, href: "#" },
+                        { name: "Jobs", icon: HiOutlineBriefcase, href: "#" },
+                        { name: "Inbox", icon: HiOutlineChatBubbleLeft, href: "#" },
+                        { name: "Search", icon: HiOutlineMagnifyingGlass, href: "/search" },
+                        ...(user?.role === "admin" ? [{ name: "Admin Panel", icon: HiOutlineShieldCheck, href: "/admin" }] : []),
                     ].map((item) => {
                         const isActive = pathname === item.href;
+                        const Icon = item.icon;
                         return (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer transition-all ${isActive
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all group ${isActive
                                     ? "text-gray-900 font-bold bg-gray-100/80 shadow-sm"
-                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-medium"
+                                    : "text-gray-900 hover:bg-gray-50 font-medium"
                                     }`}
                             >
-                                <span className="text-xl">{item.icon}</span>
-                                <span className="text-sm">{item.name}</span>
+                                <Icon className="w-6 h-6 transition-colors text-gray-900" strokeWidth={1.5} />
+                                <span className="text-[15px]">{item.name}</span>
                             </Link>
                         );
                     })}

@@ -10,10 +10,13 @@ import {
   FaShare,
   FaTrash,
   FaFlag,
+  FaBookmark,
+  FaRegBookmark,
 } from "react-icons/fa";
 import { getUser } from "../utils/auth";
 import CommentSection from "./CommentSection";
 import ReportModal from "./ReportModal";
+import PollCard from "./PollCard";
 
 export default function PostCard({ post }) {
   const user = getUser();
@@ -241,6 +244,9 @@ export default function PostCard({ post }) {
           )}
         </div>
       )}
+
+      {/* Poll */}
+      {post.poll && <PollCard poll={post.poll} postId={post._id || post.id} />}
 
       {/* Tags */}
       <div className="px-4 pt-3 flex flex-wrap gap-2">

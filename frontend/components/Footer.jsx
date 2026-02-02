@@ -20,9 +20,11 @@ export default function Footer() {
                     {/* Logo Section - Spans 2 columns for breathing room */}
                     <div className="md:col-span-2 flex flex-col justify-between">
                         <div>
-                            <h2 className="text-4xl font-serif italic text-gray-200 tracking-tight hover:text-black transition-colors duration-300 cursor-pointer">
-                                ProConnect
-                            </h2>
+                            <Link href="/">
+                                <h2 className="text-4xl font-serif italic text-gray-200 tracking-tight hover:text-black transition-colors duration-300 cursor-pointer">
+                                    ProConnect
+                                </h2>
+                            </Link>
                             <p className="mt-4 text-gray-500 text-sm leading-relaxed max-w-xs">
                                 The professional network for builders to show & tell. Connect
                                 with the most incredible people in tech.
