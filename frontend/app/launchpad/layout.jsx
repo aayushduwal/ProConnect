@@ -5,7 +5,7 @@ import SidebarRight from "../../components/SidebarRight";
 
 export default function LaunchpadLayout({ children }) {
     return (
-        <div className="min-h-screen bg-[#FAFAFA] font-sans">
+        <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#000000] font-sans transition-colors duration-300">
             <div className="max-w-[1500px] mx-auto grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[280px_1fr_280px] min-h-screen">
 
                 {/* LEFT COLUMN */}
@@ -14,7 +14,7 @@ export default function LaunchpadLayout({ children }) {
                 </div>
 
                 {/* MIDDLE COLUMN */}
-                <div className="flex-1 min-w-0 bg-[#FAFAFA]">
+                <div className="flex-1 min-w-0">
                     {children}
                 </div>
 

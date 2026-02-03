@@ -46,16 +46,16 @@ const GitHubRepos = ({ username }) => {
                     href={repo.html_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-sm transition-all bg-white"
+                    className="block p-4 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-green-500 dark:hover:border-green-500/50 hover:shadow-sm transition-all bg-white dark:bg-white/5"
                 >
                     <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-bold text-gray-900 truncate pr-2">{repo.name}</h4>
-                        <span className="text-xs border border-gray-200 px-2 py-0.5 rounded-full text-gray-500 whitespace-nowrap">
+                        <h4 className="font-bold text-gray-900 dark:text-gray-100 truncate pr-2">{repo.name}</h4>
+                        <span className="text-xs border border-gray-200 dark:border-gray-800 px-2 py-0.5 rounded-full text-gray-500 whitespace-nowrap">
                             {repo.visibility || 'public'}
                         </span>
                     </div>
-                    <p className="text-sm text-gray-500 line-clamp-2 h-10 mb-3">{repo.description || "No description available."}</p>
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 h-10 mb-3">{repo.description || "No description available."}</p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                         {repo.language && (
                             <div className="flex items-center gap-1">
                                 <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
@@ -177,7 +177,7 @@ export default function PublicProfile() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex flex-col bg-white">
+            <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors">
                 <Header />
                 <div className="flex-1 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
@@ -188,11 +188,11 @@ export default function PublicProfile() {
 
     if (error || !user) {
         return (
-            <div className="min-h-screen flex flex-col bg-white">
+            <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors">
                 <Header />
                 <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">User not found 😕</h2>
-                    <p className="text-gray-500">The user @{username} does not exist.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">User not found 😕</h2>
+                    <p className="text-gray-500 dark:text-gray-400">The user @{username} does not exist.</p>
                 </div>
             </div>
         );
@@ -202,7 +202,7 @@ export default function PublicProfile() {
     const socialLinks = user.socialLinks || {};
 
     return (
-        <div className="min-h-screen flex flex-col bg-white">
+        <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors">
             <Header />
 
             <main className="flex-1 flex flex-col items-center px-4 pt-24 pb-8">
@@ -211,7 +211,7 @@ export default function PublicProfile() {
                     {/* Top Section: Avatar & Basic Info */}
                     <div className="flex flex-col items-center text-center mb-8">
                         <div className="relative mb-4">
-                            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md">
+                            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white dark:border-gray-900 shadow-md">
                                 <img
                                     src={
                                         (user.profilePicture && user.profilePicture.length > 0 ? user.profilePicture : null) ||
@@ -225,17 +225,17 @@ export default function PublicProfile() {
                         </div>
 
                         <div className="flex items-center gap-2 mb-1">
-                            <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{user.name}</h1>
                             {user.verified && <FaCheck className="text-green-500 text-sm" title="Verified" />}
                         </div>
 
                         {user.bio && (
-                            <p className="text-gray-600 max-w-lg mb-3 leading-relaxed">
+                            <p className="text-gray-600 dark:text-gray-400 max-w-lg mb-3 leading-relaxed">
                                 {user.bio}
                             </p>
                         )}
 
-                        <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-6">
                             {user.location && (
                                 <div className="flex items-center gap-1">
                                     <FiMapPin />
@@ -265,7 +265,7 @@ export default function PublicProfile() {
                                 {user.skills.map((skill, idx) => (
                                     <div
                                         key={idx}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors cursor-default"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default"
                                     >
                                         <span className="opacity-80 scale-90">{getSkillIcon(skill)}</span>
                                         <span>{formatDisplayName(skill)}</span>
@@ -281,7 +281,7 @@ export default function PublicProfile() {
                                     onClick={handleFollowToggle}
                                     disabled={followLoading}
                                     className={`px-6 py-2 rounded-full font-bold text-sm transition-all shadow-sm flex items-center gap-2 ${isFollowing
-                                        ? "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                        ? "bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
                                         : "bg-green-600 text-white hover:bg-green-700 border border-transparent"
                                         }`}
                                 >
@@ -291,37 +291,37 @@ export default function PublicProfile() {
                             <div className="flex gap-4 items-center px-4">
                                 <button
                                     onClick={() => openNetworkModal("followers")}
-                                    className="text-sm text-gray-600 hover:text-green-600"
+                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
                                 >
-                                    <span className="font-bold text-gray-900">{user.followers?.length || 0}</span> followers
+                                    <span className="font-bold text-gray-900 dark:text-gray-100">{user.followers?.length || 0}</span> followers
                                 </button>
                                 <button
                                     onClick={() => openNetworkModal("following")}
-                                    className="text-sm text-gray-600 hover:text-green-600"
+                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
                                 >
-                                    <span className="font-bold text-gray-900">{user.following?.length || 0}</span> following
+                                    <span className="font-bold text-gray-900 dark:text-gray-100">{user.following?.length || 0}</span> following
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     {/* Tabs */}
-                    <div className="border-b border-gray-200 mb-6">
+                    <div className="border-b border-gray-200 dark:border-gray-800 mb-6 transition-colors">
                         <div className="flex gap-8 justify-center">
                             <button
-                                className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'work' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                                className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'work' ? 'border-green-500 text-green-600 dark:text-green-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
                                 onClick={() => setActiveTab('work')}
                             >
                                 WORK
                             </button>
                             <button
-                                className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'resume' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                                className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'resume' ? 'border-green-500 text-green-600 dark:text-green-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
                                 onClick={() => setActiveTab('resume')}
                             >
                                 RESUME
                             </button>
                             <button
-                                className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'posts' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                                className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'posts' ? 'border-green-500 text-green-600 dark:text-green-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
                                 onClick={() => setActiveTab('posts')}
                             >
                                 POSTS
@@ -340,7 +340,7 @@ export default function PublicProfile() {
                                         <PostCard key={post._id} post={post} currentUser={currentUser} />
                                     ))
                                 ) : (
-                                    <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100 border-dashed">
+                                    <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-gray-800 border-dashed">
                                         <p className="text-gray-400">No posts yet.</p>
                                     </div>
                                 )}
@@ -353,12 +353,12 @@ export default function PublicProfile() {
                                 {socialLinks.github && (
                                     <div className="flex flex-col gap-4">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <FaGithub size={24} className="text-gray-900" />
-                                            <h2 className="text-xl font-bold text-gray-900">GitHub</h2>
+                                            <FaGithub size={24} className="text-gray-900 dark:text-white" />
+                                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">GitHub</h2>
                                         </div>
 
                                         {/* Contribution Graph (Image based for simplicity) */}
-                                        <div className="w-full overflow-hidden rounded-lg border border-gray-200 p-4 bg-white">
+                                        <div className="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 p-4 bg-white dark:bg-[#111]">
                                             <h3 className="text-sm font-medium text-gray-500 mb-4">Contributions in the last year</h3>
                                             <div className="w-full overflow-x-auto">
                                                 <img
@@ -378,25 +378,25 @@ export default function PublicProfile() {
                                 {user.projects && user.projects.length > 0 ? (
                                     <div className="flex flex-col gap-4">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <FiGrid size={24} className="text-gray-900" />
-                                            <h2 className="text-xl font-bold text-gray-900">My Projects</h2>
+                                            <FiGrid size={24} className="text-gray-900 dark:text-white" />
+                                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">My Projects</h2>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {user.projects.map((project, idx) => (
-                                                <div key={idx} className="border border-gray-200 rounded-xl p-4 hover:border-green-500 transition-colors bg-white">
+                                                <div key={idx} className="border border-gray-200 dark:border-gray-800 rounded-xl p-4 hover:border-green-500 dark:hover:border-green-500/50 transition-colors bg-white dark:bg-white/5">
                                                     <div className="flex items-start justify-between mb-2">
                                                         <div className="flex items-center gap-3">
                                                             {project.image ? (
-                                                                <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100">
+                                                                <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800">
                                                                     <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
                                                                 </div>
                                                             ) : (
-                                                                <div className="w-10 h-10 rounded-md bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
+                                                                <div className="w-10 h-10 rounded-md bg-green-100 dark:bg-green-500/20 flex items-center justify-center text-green-600 dark:text-green-400 font-bold text-lg">
                                                                     {project.title.charAt(0)}
                                                                 </div>
                                                             )}
                                                             <div>
-                                                                <h3 className="font-bold text-gray-900 line-clamp-1">{project.title}</h3>
+                                                                <h3 className="font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{project.title}</h3>
                                                                 {project.link && (
                                                                     <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-green-600 flex items-center gap-1">
                                                                         View Project <FaLink size={10} />
@@ -405,12 +405,12 @@ export default function PublicProfile() {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 min-h-[40px]">{project.description}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 min-h-[40px]">{project.description}</p>
 
                                                     {project.tags && project.tags.length > 0 && (
                                                         <div className="flex flex-wrap gap-2 mt-auto">
                                                             {project.tags.slice(0, 3).map((tag, tIdx) => (
-                                                                <span key={tIdx} className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-md">
+                                                                <span key={tIdx} className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-md">
                                                                     {tag}
                                                                 </span>
                                                             ))}
@@ -423,12 +423,12 @@ export default function PublicProfile() {
                                     </div>
                                 ) : (
                                     !socialLinks.github && (
-                                        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100 border-dashed">
-                                            <div className="mx-auto w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mb-3">
-                                                <FiBriefcase className="text-gray-400" />
+                                        <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-gray-800 border-dashed">
+                                            <div className="mx-auto w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center mb-3">
+                                                <FiBriefcase className="text-gray-400 dark:text-gray-500" />
                                             </div>
-                                            <h3 className="text-gray-900 font-medium">Work & Projects</h3>
-                                            <p className="text-gray-500 text-sm mt-1">Hasn't added any work or projects yet.</p>
+                                            <h3 className="text-gray-900 dark:text-gray-100 font-medium">Work & Projects</h3>
+                                            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Hasn't added any work or projects yet.</p>
                                         </div>
                                     )
                                 )}
@@ -436,18 +436,40 @@ export default function PublicProfile() {
                             </div>
                         )}
                         {activeTab === 'resume' && (
-                            <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100 border-dashed">
-                                <div className="mx-auto w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mb-3">
-                                    <FiFileText className="text-gray-400" />
-                                </div>
-                                <h3 className="text-gray-900 font-medium">Resume</h3>
-                                <p className="text-gray-500 text-sm mt-1">Resume not available.</p>
+                            <div className="flex flex-col items-center justify-center text-center py-12 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-gray-800 border-dashed">
+                                {user.resumeUrl ? (
+                                    <>
+                                        <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-500/10 rounded-full flex items-center justify-center mb-4 text-green-600 dark:text-green-500">
+                                            <FiFileText size={32} />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Professional Resume</h3>
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 max-w-sm">
+                                            View {user.name}'s professional experience and qualifications.
+                                        </p>
+                                        <a
+                                            href={user.resumeUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-full font-bold transition-all shadow-md flex items-center gap-2"
+                                        >
+                                            <FiFileText /> View Resume
+                                        </a>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="mx-auto w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center mb-3">
+                                            <FiFileText className="text-gray-400 dark:text-gray-500" />
+                                        </div>
+                                        <h3 className="text-gray-900 dark:text-gray-100 font-medium">Resume</h3>
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Resume not available.</p>
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>
 
                     {/* Footer / Socials - Inspired by Peerlist Bottom Section */}
-                    <div className="border-t border-gray-200 mt-12 pt-8 flex justify-center pb-8">
+                    <div className="border-t border-gray-200 dark:border-gray-800 mt-12 pt-8 flex justify-center pb-8 transition-colors">
                         <div className="flex gap-4">
                             {/* Render Social Links if they exist */}
                             {Object.entries(socialLinks).map(([platform, handle]) => {
@@ -467,7 +489,7 @@ export default function PublicProfile() {
                                         href={url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-gray-400 hover:text-gray-900 transition-colors p-2 hover:bg-gray-100 rounded-full"
+                                        className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full"
                                         title={platform}
                                     >
                                         {getSocialIcon(platform)}

@@ -13,9 +13,43 @@ router.get("/stats", authMiddleware, adminMiddleware, async (req, res) => {
         const userCount = await User.countDocuments();
         const postCount = await Post.countDocuments();
 
+        // Support dynamic day range (7 or 30)
+        const days = parseInt(req.query.days) || 7;
+        const limit = Math.min(Math.max(days, 1), 30); // Clamp between 1 and 30
+
+        // Get activity for the last N days
+        const activity = [];
+        for (let i = limit - 1; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            date.setHours(0, 0, 0, 0);
+
+            const nextDay = new Date(date);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+            // For longer ranges, maybe just the number if it's 30? No, let's keep short day name for now.
+            const label = limit > 7 ? `${date.getDate()} ${dayName}` : dayName;
+
+            const usersThisDay = await User.countDocuments({
+                createdAt: { $gte: date, $lt: nextDay }
+            });
+
+            const postsThisDay = await Post.countDocuments({
+                createdAt: { $gte: date, $lt: nextDay }
+            });
+
+            activity.push({
+                day: label,
+                users: usersThisDay,
+                posts: postsThisDay
+            });
+        }
+
         res.json({
             users: userCount,
             posts: postCount,
+            activity: activity,
             systemStatus: "Healthy",
         });
     } catch (err) {

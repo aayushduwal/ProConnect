@@ -1,13 +1,13 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "ProConnect - The Professional Network",
+  title: "ProConnect - The Professional Networking Platform",
   description: "Connect, collaborate, and grow with ProConnect",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Meta tags */}
         <meta charSet="UTF-8" />
@@ -28,7 +28,25 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
 
-        <title>ProConnect - The Professional Network</title>
+        <title>ProConnect - The Professional Networking Platform</title>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('light');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>

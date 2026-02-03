@@ -33,8 +33,8 @@ export default function PollCard({ poll, postId }) {
     const totalVotes = pollData.options.reduce((sum, opt) => sum + (opt.voters?.length || 0), 0);
 
     return (
-        <div className="mt-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-            <h4 className="font-bold text-gray-900 mb-3">{pollData.question}</h4>
+        <div className="mt-3 p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-gray-800 transition-colors">
+            <h4 className="font-bold text-gray-900 dark:text-white mb-3">{pollData.question}</h4>
             <div className="space-y-2">
                 {pollData.options.map((option, index) => {
                     const optionVotes = option.voters?.length || 0;
@@ -46,26 +46,26 @@ export default function PollCard({ poll, postId }) {
                             key={index}
                             onClick={() => handleVote(index)}
                             className={`w-full p-3 rounded-lg border transition-all text-left relative overflow-hidden ${isMyVote
-                                ? "border-green-500 bg-green-50"
-                                : "border-gray-300 hover:border-gray-400 hover:bg-white"
+                                ? "border-green-500 bg-green-50 dark:bg-green-500/10"
+                                : "border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600 hover:bg-white dark:hover:bg-white/5"
                                 }`}
                         >
                             {hasVoted && (
                                 <div
-                                    className={`absolute left-0 top-0 bottom-0 transition-all ${isMyVote ? "bg-green-200/50" : "bg-gray-200"
+                                    className={`absolute left-0 top-0 bottom-0 transition-all ${isMyVote ? "bg-green-200/50 dark:bg-green-500/20" : "bg-gray-200 dark:bg-white/10"
                                         }`}
                                     style={{ width: `${percentage}%` }}
                                 />
                             )}
                             <div className="relative z-10 flex justify-between items-center">
                                 <div className="flex items-center gap-2">
-                                    <span className={`font-medium ${isMyVote ? "text-green-700" : "text-gray-900"}`}>
+                                    <span className={`font-medium ${isMyVote ? "text-green-700 dark:text-green-400" : "text-gray-900 dark:text-white"}`}>
                                         {option.text}
                                     </span>
                                     {isMyVote && <span className="text-xs text-green-600 font-bold">(Your vote)</span>}
                                 </div>
                                 {hasVoted && (
-                                    <span className={`text-sm font-bold ${isMyVote ? "text-green-700" : "text-gray-900"}`}>
+                                    <span className={`text-sm font-bold ${isMyVote ? "text-green-700 dark:text-green-400" : "text-gray-900 dark:text-white"}`}>
                                         {percentage}% ({optionVotes})
                                     </span>
                                 )}
@@ -75,7 +75,7 @@ export default function PollCard({ poll, postId }) {
                 })}
             </div>
             {hasVoted && (
-                <p className="text-xs text-gray-900 mt-3 font-medium">
+                <p className="text-xs text-gray-900 dark:text-gray-400 mt-3 font-medium">
                     {totalVotes} {totalVotes === 1 ? "vote" : "votes"} • Click your vote to undo (or pick another)
                 </p>
             )}

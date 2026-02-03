@@ -107,7 +107,7 @@ export default function PostCard({ post }) {
   if (!post.author) return null;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-6 overflow-hidden font-sans hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-[#0A0A0A] rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 mb-6 overflow-hidden font-sans hover:shadow-md transition-all">
       {/* Post Header */}
       <div className="p-4 flex gap-3">
         <Link href={`/u/${post.author.username}`}>
@@ -117,7 +117,7 @@ export default function PostCard({ post }) {
               `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name || 'User')}`
             }
             alt={post.author.name}
-            className="rounded-full w-10 h-10 object-cover border border-gray-100 cursor-pointer"
+            className="rounded-full w-10 h-10 object-cover border border-gray-100 dark:border-gray-800 cursor-pointer"
           />
         </Link>
 
@@ -125,17 +125,17 @@ export default function PostCard({ post }) {
           <div className="flex justify-between items-start">
             <div>
               <Link href={`/u/${post.author.username}`}>
-                <h3 className="font-bold text-gray-900 text-sm hover:underline cursor-pointer truncate">
+                <h3 className="font-bold text-gray-900 dark:text-white text-sm hover:underline cursor-pointer truncate transition-colors">
                   {post.author.name}
                 </h3>
               </Link>
-              <p className="text-xs text-gray-500 line-clamp-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
                 {post.author.headline || `@${post.author.username}`}
               </p>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 whitespace-nowrap">
+              <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
                 {new Date(post.createdAt).toLocaleDateString()}
               </span>
 
@@ -144,10 +144,10 @@ export default function PostCard({ post }) {
                 <div className="relative">
                   <button
                     onClick={() => setShowMenu(!showMenu)}
-                    className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full transition-colors"
                     aria-label="Post options"
                   >
-                    <FaEllipsisH className="text-gray-500" size={14} />
+                    <FaEllipsisH className="text-gray-500 dark:text-gray-400" size={14} />
                   </button>
 
                   {showMenu && (
@@ -159,13 +159,13 @@ export default function PostCard({ post }) {
                       />
 
                       {/* Dropdown menu */}
-                      <div className="absolute right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20 min-w-[150px]">
+                      <div className="absolute right-0 mt-1 bg-white dark:bg-[#111] rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-20 min-w-[150px]">
                         <button
                           onClick={() => {
                             setShowMenu(false);
                             handleDelete();
                           }}
-                          className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                          className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2 transition-colors"
                         >
                           <FaTrash size={12} />
                           Delete Post
@@ -184,19 +184,19 @@ export default function PostCard({ post }) {
                     className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
                     aria-label="Post options"
                   >
-                    <FaEllipsisH className="text-gray-500" size={14} />
+                    <FaEllipsisH className="text-gray-500 dark:text-gray-400" size={14} />
                   </button>
 
                   {showMenu && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                      <div className="absolute right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20 min-w-[150px]">
+                      <div className="absolute right-0 mt-1 bg-white dark:bg-[#111] rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-20 min-w-[150px]">
                         <button
                           onClick={() => {
                             setShowMenu(false);
                             setShowReportModal(true);
                           }}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                          className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                         >
                           <FaFlag className="text-red-500" size={12} />
                           Report Post
@@ -214,16 +214,16 @@ export default function PostCard({ post }) {
       {/* Post Content */}
       <div className="px-4 pb-2">
         {post.title && (
-          <h2 className="font-bold text-lg mb-2 text-gray-900">{post.title}</h2>
+          <h2 className="font-bold text-lg mb-2 text-gray-900 dark:text-white transition-colors">{post.title}</h2>
         )}
-        <p className="text-[15px] text-gray-800 whitespace-pre-line leading-relaxed">
+        <p className="text-[15px] text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed transition-colors">
           {post.content}
         </p>
       </div>
 
       {/* Post Media */}
       {post.mediaUrl && post.mediaUrl !== "none" && (
-        <div className="mt-3 relative w-full bg-gray-50 border-t border-b border-gray-100">
+        <div className="mt-3 relative w-full bg-gray-50 dark:bg-black/20 border-t border-b border-gray-100 dark:border-gray-800">
           {post.mediaType === "video" ? (
             <video
               src={post.mediaUrl}
@@ -251,7 +251,7 @@ export default function PostCard({ post }) {
       {/* Tags */}
       <div className="px-4 pt-3 flex flex-wrap gap-2">
         {post.category && (
-          <span className="bg-purple-50 text-purple-700 px-2.5 py-1 rounded-md text-xs font-semibold border border-purple-100">
+          <span className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 px-2.5 py-1 rounded-md text-xs font-semibold border border-purple-100 dark:border-purple-800 transition-colors">
             {post.category}
           </span>
         )}
@@ -259,7 +259,7 @@ export default function PostCard({ post }) {
           (tag, idx) => (
             <span
               key={idx}
-              className="bg-gray-50 text-gray-600 px-2.5 py-1 rounded-md text-xs font-medium border border-gray-100"
+              className="bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-400 px-2.5 py-1 rounded-md text-xs font-medium border border-gray-100 dark:border-gray-800"
             >
               #{tag}
             </span>
@@ -268,10 +268,10 @@ export default function PostCard({ post }) {
       </div>
 
       {/* Action Bar */}
-      <div className="px-4 py-3 flex items-center gap-6 mt-2 border-t border-gray-50 bg-white">
+      <div className="px-4 py-3 flex items-center gap-6 mt-2 border-t border-gray-50 dark:border-gray-900/50 bg-white dark:bg-[#0A0A0A] transition-colors">
         <button
           onClick={handleLike}
-          className={`group flex items-center gap-2 text-sm font-medium transition-colors ${liked ? "text-red-500" : "text-gray-500 hover:text-gray-900"
+          className={`group flex items-center gap-2 text-sm font-medium transition-colors ${liked ? "text-red-500" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             }`}
         >
           <span className="transform group-active:scale-125 transition-transform duration-200">
@@ -281,7 +281,7 @@ export default function PostCard({ post }) {
         </button>
 
         <button
-          className={`flex items-center gap-2 text-sm font-medium transition-colors ${showComments ? "text-purple-600" : "text-gray-500 hover:text-gray-900"}`}
+          className={`flex items-center gap-2 text-sm font-medium transition-colors ${showComments ? "text-purple-600" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
           onClick={() => setShowComments(!showComments)}
         >
           <FaRegCommentDots size={18} />
@@ -291,7 +291,7 @@ export default function PostCard({ post }) {
         </button>
 
         <button
-          className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors ml-auto"
+          className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors ml-auto"
           onClick={() => {
             navigator.clipboard.writeText(
               window.location.origin + `/post/${post._id}`

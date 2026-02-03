@@ -217,14 +217,14 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-xl w-full max-w-2xl shadow-2xl relative flex flex-col max-h-[90vh]">
+            <div className="bg-white dark:bg-[#0A0A0A] rounded-xl w-full max-w-2xl shadow-2xl relative flex flex-col max-h-[90vh] border border-gray-100 dark:border-gray-800 transition-colors duration-300">
 
                 {/* Header */}
-                <div className="flex justify-between items-center p-4 border-b border-gray-100">
-                    <h2 className="text-xl font-bold text-gray-800">Create Post</h2>
+                <div className="flex justify-between items-center p-4 border-b border-gray-100 dark:border-gray-800">
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-white">Create Post</h2>
                     <button
                         onClick={onClose}
-                        className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+                        className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
                     >
                         <FaTimes size={20} />
                     </button>
@@ -242,10 +242,10 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                         `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}`
                                     }
                                     alt="User"
-                                    className="w-full h-full rounded-full object-cover"
+                                    className="w-full h-full rounded-full object-cover border border-gray-100 dark:border-gray-800"
                                 />
                             ) : (
-                                <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
                             )}
                         </div>
                         <div className="flex-1 space-y-4">
@@ -257,7 +257,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                         onClick={() => setCategory(cat)}
                                         className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap border transition-all ${category === cat
                                             ? "bg-purple-600 text-white border-purple-600 shadow-sm"
-                                            : "bg-purple-50 text-purple-700 border-purple-100 hover:bg-purple-100"
+                                            : "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/40"
                                             }`}
                                     >
                                         {cat}
@@ -270,16 +270,16 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                                 placeholder={placeholders[placeholderIndex]}
-                                className="w-full text-lg text-gray-900 resize-none outline-none min-h-[100px] placeholder-gray-400 mt-2"
+                                className="w-full text-lg text-gray-900 dark:text-white resize-none outline-none min-h-[100px] placeholder-gray-400 dark:placeholder-gray-600 mt-2 bg-transparent"
                             />
                         </div>
                     </div>
 
                     {/* Media Input Area */}
                     {showMediaInput && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100 animate-in fade-in slide-in-from-top-2">
+                        <div className="mt-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-gray-800 animate-in fade-in slide-in-from-top-2">
                             <div className="flex justify-between items-center mb-4">
-                                <span className="text-sm font-medium text-gray-600 capitalize">
+                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 capitalize">
                                     Add {mediaType === 'none' ? 'Media' : mediaType}
                                 </span>
                                 <button onClick={() => setShowMediaInput(false)} className="text-gray-400 hover:text-red-500 transition-colors">
@@ -293,11 +293,11 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                         type="text"
                                         value={mediaUrl}
                                         onChange={(e) => setMediaUrl(e.target.value)}
-                                        className="flex-1 p-2.5 border border-gray-200 rounded-lg outline-none focus:border-black transition-colors text-sm"
+                                        className="flex-1 p-2.5 border border-gray-200 dark:border-gray-800 rounded-lg outline-none focus:border-black dark:focus:border-gray-600 transition-colors text-sm bg-transparent text-gray-900 dark:text-white"
                                         placeholder={`Paste ${mediaType} URL...`}
                                         autoFocus
                                     />
-                                    <span className="self-center text-gray-400 text-sm">OR</span>
+                                    <span className="self-center text-gray-400 dark:text-gray-600 text-sm">OR</span>
                                     <input
                                         type="file"
                                         ref={fileInputRef}
@@ -307,7 +307,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                     />
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2"
+                                        className="px-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/10 transition-colors flex items-center gap-2"
                                         disabled={uploading}
                                     >
                                         {uploading ? (
@@ -320,7 +320,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                 </div>
 
                                 {mediaUrl && (
-                                    <div className="relative mt-2 rounded-lg overflow-hidden border border-gray-200 bg-black/5 aspect-video flex items-center justify-center">
+                                    <div className="relative mt-2 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 bg-black/5 dark:bg-white/5 aspect-video flex items-center justify-center">
                                         {mediaType === 'image' ? (
                                             <img src={mediaUrl} alt="Preview" className="max-h-[300px] w-auto max-w-full object-contain" />
                                         ) : mediaType === 'video' ? (
@@ -336,9 +336,9 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
 
                     {/* Poll Input Area */}
                     {showPollInput && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100 animate-in fade-in slide-in-from-top-2">
+                        <div className="mt-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-gray-800 animate-in fade-in slide-in-from-top-2">
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium text-gray-900">Create a Poll</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">Create a Poll</span>
                                 <button onClick={() => setShowPollInput(false)} className="text-red-500 hover:bg-red-50 p-1 rounded">
                                     <FaTimes size={14} />
                                 </button>
@@ -347,7 +347,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                 type="text"
                                 value={pollQuestion}
                                 onChange={(e) => setPollQuestion(e.target.value)}
-                                className="w-full p-2 border border-gray-200 rounded-lg outline-none focus:border-black mb-2 text-gray-900"
+                                className="w-full p-2 border border-gray-200 dark:border-gray-800 rounded-lg outline-none focus:border-black dark:focus:border-gray-600 mb-2 text-gray-900 dark:text-white bg-transparent"
                                 placeholder="Ask a question..."
                             />
                             {/* Simple placeholders for options */}
@@ -362,13 +362,13 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                             newOptions[idx] = e.target.value;
                                             setPollOptions(newOptions);
                                         }}
-                                        className="w-full p-2 border border-gray-200 rounded-lg bg-white text-sm outline-none focus:border-black text-gray-900"
+                                        className="w-full p-2 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-white/5 text-sm outline-none focus:border-black dark:focus:border-gray-600 text-gray-900 dark:text-white"
                                         placeholder={`Option ${idx + 1}`}
                                     />
                                 ))}
                                 <button
                                     onClick={() => setPollOptions([...pollOptions, ""])}
-                                    className="text-sm text-gray-500 hover:text-gray-900 font-medium"
+                                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
                                 >
                                     + Add Option
                                 </button>
@@ -378,38 +378,38 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                 </div>
 
                 {/* Footer / Toolbar */}
-                <div className="p-4 border-t border-gray-100 bg-gray-50/50 rounded-b-xl">
+                <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-white/5 rounded-b-xl">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1">
                             <button
                                 onClick={() => { setShowMediaInput(true); setMediaType('image'); setShowPollInput(false); }}
-                                className={`p-2 rounded-lg transition-colors ${mediaType === 'image' && showMediaInput ? "bg-green-100 text-green-700" : "hover:bg-gray-200 text-gray-600"}`}
+                                className={`p-2 rounded-lg transition-colors ${mediaType === 'image' && showMediaInput ? "bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400" : "hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400"}`}
                                 title="Image"
                             >
                                 <FaImage size={18} />
                             </button>
                             <button
                                 onClick={() => { setShowMediaInput(true); setMediaType('video'); setShowPollInput(false); }}
-                                className={`p-2 rounded-lg transition-colors ${mediaType === 'video' && showMediaInput ? "bg-green-100 text-green-700" : "hover:bg-gray-200 text-gray-600"}`}
+                                className={`p-2 rounded-lg transition-colors ${mediaType === 'video' && showMediaInput ? "bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400" : "hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400"}`}
                                 title="Video"
                             >
                                 <FaVideo size={18} />
                             </button>
                             <button
                                 onClick={() => { setShowPollInput(true); setShowMediaInput(false); }}
-                                className={`p-2 rounded-lg transition-colors ${showPollInput ? "bg-green-100 text-green-700" : "hover:bg-gray-200 text-gray-600"}`}
+                                className={`p-2 rounded-lg transition-colors ${showPollInput ? "bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400" : "hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400"}`}
                                 title="Poll"
                             >
                                 <FaPoll size={18} />
                             </button>
-                            <button className="p-2 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors" title="Book (Coming Soon)">
+                            <button className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-lg text-gray-600 dark:text-gray-400 transition-colors" title="Book (Coming Soon)">
                                 <FaBook size={18} />
                             </button>
-                            <div className="w-px h-6 bg-gray-300 mx-1"></div>
+                            <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1"></div>
                             <div className="relative" ref={emojiPickerRef}>
                                 <button
                                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                    className={`p-2 rounded-lg transition-colors ${showEmojiPicker ? "bg-yellow-100 text-yellow-700" : "hover:bg-gray-200 text-gray-600"}`}
+                                    className={`p-2 rounded-lg transition-colors ${showEmojiPicker ? "bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400" : "hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400"}`}
                                     title="Emoji"
                                     type="button"
                                 >
@@ -430,7 +430,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                             <button
                                 onClick={handlePost}
                                 disabled={!content && !mediaUrl && !pollQuestion}
-                                className="px-6 py-2 bg-green-600 text-white rounded-full font-bold text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-green-200"
+                                className="px-6 py-2 bg-green-600 text-white rounded-full font-bold text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-green-200 dark:shadow-none"
                             >
                                 {loading ? "Posting..." : "Post"}
                             </button>

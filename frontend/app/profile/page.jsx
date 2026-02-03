@@ -12,7 +12,9 @@ export default function ProfileSettingsPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const fileInputRef = useRef(null);
+  const resumeInputRef = useRef(null);
 
   // Form States
   const [formData, setFormData] = useState({
@@ -24,6 +26,7 @@ export default function ProfileSettingsPage() {
     website: "",
     calendarLink: "",
     skills: [], // New skills array
+    resumeUrl: "", // New resume URL
     socialLinks: {
       twitter: "",
       instagram: "",
@@ -114,13 +117,15 @@ export default function ProfileSettingsPage() {
             youtube: data.socialLinks?.youtube || "",
             threads: data.socialLinks?.threads || "",
             github: data.socialLinks?.github || ""
-          }
+          },
+          resumeUrl: data.resumeUrl || ""
         });
         setLocationQuery(data.location || "");
         if (data.skills && Array.isArray(data.skills)) {
           setFormData(prev => ({ ...prev, skills: data.skills }));
         }
         setAvatarUrl(data.avatarUrl || data.profilePicture || "");
+        setSaved(true);
       })
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
@@ -149,6 +154,7 @@ export default function ProfileSettingsPage() {
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+    setSaved(false);
   };
 
   // Location Search Debounce
@@ -201,12 +207,14 @@ export default function ProfileSettingsPage() {
     // Don't set formData immediately if you want them to pick from list, 
     // but typically we allow free text too:
     setFormData(prev => ({ ...prev, location: e.target.value }));
+    setSaved(false);
   };
 
   const selectLocation = (locName) => {
     setLocationQuery(locName);
     setFormData(prev => ({ ...prev, location: locName }));
     setShowLocationSuggestions(false);
+    setSaved(false);
   };
 
   const addSkill = (skill) => {
@@ -223,6 +231,7 @@ export default function ProfileSettingsPage() {
         setFormData(prev => ({ ...prev, skills: [...prev.skills, formattedSkill] }));
         setSkillQuery("");
         setShowSkillSuggestions(false);
+        setSaved(false);
       } else {
         alert("You can only add up to 10 skills.");
       }
@@ -234,6 +243,7 @@ export default function ProfileSettingsPage() {
       ...prev,
       skills: prev.skills.filter(s => s !== skillToRemove)
     }));
+    setSaved(false);
   };
 
   const handleSkillKeyDown = (e) => {
@@ -256,11 +266,49 @@ export default function ProfileSettingsPage() {
         headers: { "Content-Type": "multipart/form-data" }
       });
       setAvatarUrl(res.data.url);
+      setSaved(false);
     } catch (err) {
       console.error("Upload failed", err);
       alert("Failed to upload image");
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  const [uploadingResume, setUploadingResume] = useState(false);
+
+  const handleResumeUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Basic validation for resume type
+    if (!file.type.includes("pdf") && !file.type.includes("document") && !file.type.includes("msword")) {
+      alert("Please upload a PDF or Word document.");
+      return;
+    }
+
+    setUploadingResume(true);
+    const uploadData = new FormData();
+    uploadData.append("file", file);
+
+    try {
+      const res = await api.post("/upload", uploadData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      setFormData(prev => ({ ...prev, resumeUrl: res.data.url }));
+      setSaved(false);
+    } catch (err) {
+      console.error("Resume upload failed", err);
+      alert("Failed to upload resume");
+    } finally {
+      setUploadingResume(false);
+    }
+  };
+
+  const handleRemoveResume = () => {
+    if (window.confirm("Are you sure you want to remove your resume?")) {
+      setFormData(prev => ({ ...prev, resumeUrl: "" }));
+      setSaved(false);
     }
   };
 
@@ -280,7 +328,7 @@ export default function ProfileSettingsPage() {
       const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
       localStorage.setItem("user", JSON.stringify({ ...currentUser, ...payload }));
 
-      // alert("Profile updated successfully!"); // Optional: use toast or simpler feedback
+      setSaved(true);
     } catch (err) {
       console.error("Save failed", err);
       alert("Failed to save profile");
@@ -289,36 +337,36 @@ export default function ProfileSettingsPage() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading settings...</div>;
+  if (loading) return <div className="p-8 text-center text-gray-500 dark:text-gray-400">Loading settings...</div>;
 
   return (
-    <div className="relative pb-24">
+    <div className="relative pb-24 bg-white dark:bg-black transition-colors min-h-screen">
       {/* Header */}
-      <div className="px-8 py-6 border-b border-gray-100 flex items-center gap-2">
-        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+      <div className="px-8 py-6 border-b border-gray-100 dark:border-gray-900 flex items-center gap-2">
+        <button className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full transition-colors text-gray-500 dark:text-gray-400">
           <span className="sr-only">Back</span>
           ←
         </button>
-        <div className="text-sm font-medium text-gray-500">Settings</div>
-        <div className="text-sm text-gray-300">→</div>
-        <div className="text-sm font-bold text-gray-900">Profile</div>
+        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Settings</div>
+        <div className="text-sm text-gray-300 dark:text-gray-700">→</div>
+        <div className="text-sm font-bold text-gray-900 dark:text-white">Profile</div>
       </div>
 
       <div className="px-8 py-8 space-y-12">
 
         {/* Basic Profile */}
         <section>
-          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-6 flex items-center gap-2">
+          <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6 flex items-center gap-2">
             <FaUser size={12} /> Basic Profile
           </h3>
 
           <div className="flex items-start gap-6 mb-8">
             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800">
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
                     <FaUser size={24} />
                   </div>
                 )}
@@ -328,39 +376,39 @@ export default function ProfileSettingsPage() {
                   </div>
                 )}
               </div>
-              <div className="mt-2 text-sm font-bold text-green-600 group-hover:underline">Upload new</div>
-              <div className="text-xs text-gray-400">Recommended size: 400x400px</div>
+              <div className="mt-2 text-sm font-bold text-green-600 dark:text-green-500 group-hover:underline">Upload new</div>
+              <div className="text-xs text-gray-400 dark:text-gray-500">Recommended size: 400x400px</div>
             </div>
             <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={handleImageUpload} />
           </div>
 
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5">First name <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">First name <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
+                className="w-full border border-gray-300 dark:border-gray-800 bg-white dark:bg-white/5 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5">Last name <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Last name <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
+                className="w-full border border-gray-300 dark:border-gray-800 bg-white dark:bg-white/5 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
               />
             </div>
           </div>
 
           <div className="mb-6">
             <div className="flex justify-between">
-              <label className="block text-xs font-bold text-gray-700 mb-1.5">Brief bio <span className="text-red-500">*</span></label>
-              <span className="text-xs text-gray-400">{formData.bio.length}/120</span>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Brief bio <span className="text-red-500">*</span></label>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{formData.bio.length}/120</span>
             </div>
             <textarea
               name="bio"
@@ -368,16 +416,69 @@ export default function ProfileSettingsPage() {
               value={formData.bio}
               onChange={handleChange}
               rows={3}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none resize-none transition-colors"
+              className="w-full border border-gray-300 dark:border-gray-800 bg-white dark:bg-white/5 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none resize-none transition-colors"
             ></textarea>
-            <p className="text-xs text-gray-400 mt-1.5">This is the very first thing peers read about you after your name.</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">This is the very first thing peers read about you after your name.</p>
+          </div>
+
+          {/* Resume Upload Section */}
+          <div className="mb-6">
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">Professional Resume</label>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-white/5">
+              <div className="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-500 flex-shrink-0">
+                <FaUpload size={20} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                  {formData.resumeUrl ? "Resume Uploaded" : "Upload your resume"}
+                </h4>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  {formData.resumeUrl ? "Click to change your resume" : "PDF, DOC, or DOCX up to 10MB"}
+                </p>
+                {formData.resumeUrl && (
+                  <a
+                    href={formData.resumeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-green-600 dark:text-green-500 font-bold hover:underline mt-1 inline-block"
+                  >
+                    View Current Resume
+                  </a>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {formData.resumeUrl && (
+                  <button
+                    onClick={handleRemoveResume}
+                    className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-500/30"
+                    title="Remove Resume"
+                  >
+                    <FaTimes size={16} />
+                  </button>
+                )}
+                <button
+                  onClick={() => resumeInputRef.current?.click()}
+                  disabled={uploadingResume}
+                  className="px-4 py-2 bg-white dark:bg-white/10 border border-gray-200 dark:border-gray-800 rounded-lg text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/20 transition-colors shadow-sm"
+                >
+                  {uploadingResume ? "Uploading..." : formData.resumeUrl ? "Change File" : "Select File"}
+                </button>
+              </div>
+              <input
+                type="file"
+                ref={resumeInputRef}
+                hidden
+                accept=".pdf,.doc,.docx"
+                onChange={handleResumeUpload}
+              />
+            </div>
           </div>
 
           {/* Location - Searchable */}
           <section className="mb-8">
             <div className="grid grid-cols-2 gap-6">
               <div className="relative">
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">Location</label>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Location</label>
                 <input
                   type="text"
                   name="location"
@@ -386,14 +487,14 @@ export default function ProfileSettingsPage() {
                   onChange={handleLocationChange}
                   onFocus={() => setShowLocationSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 200)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
+                  className="w-full border border-gray-300 dark:border-gray-800 bg-white dark:bg-white/5 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
                 />
                 {showLocationSuggestions && locationSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto z-10">
+                  <div className="absolute top-full left-0 right-0 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto z-10">
                     {locationSuggestions.map((place, idx) => (
                       <div
                         key={place.place_id || idx}
-                        className="px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 truncate"
+                        className="px-3 py-2 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer text-sm text-gray-700 dark:text-gray-300 truncate"
                         onMouseDown={(e) => { e.preventDefault(); selectLocation(place.display_name); }}
                       >
                         {place.display_name}
@@ -403,12 +504,12 @@ export default function ProfileSettingsPage() {
                 )}
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">Personal pronouns</label>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Personal pronouns</label>
                 <select
                   name="pronouns"
                   value={formData.pronouns}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:ring-0 outline-none bg-white transition-colors"
+                  className="w-full border border-gray-300 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-green-500 focus:ring-0 outline-none bg-white dark:bg-white/5 transition-colors"
                 >
                   <option value="">Select</option>
                   <option value="He/Him">He/Him</option>
@@ -420,46 +521,46 @@ export default function ProfileSettingsPage() {
 
             <div className="grid grid-cols-2 gap-6 mt-6">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">Website</label>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Website</label>
                 <input
                   type="url"
                   name="website"
                   value={formData.website}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
+                  className="w-full border border-gray-300 dark:border-gray-800 bg-white dark:bg-white/5 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">Calendar link</label>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Calendar link</label>
                 <input
                   type="url"
                   name="calendarLink"
                   value={formData.calendarLink}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
+                  className="w-full border border-gray-300 dark:border-gray-800 bg-white dark:bg-white/5 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
                 />
-                <p className="text-xs text-gray-400 mt-1.5">Add your Cal.com or Calendly URL.</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Add your Cal.com or Calendly URL.</p>
               </div>
             </div>
           </section>
         </section>
 
-        <hr className="border-gray-100" />
+        <hr className="border-gray-100 dark:border-gray-900" />
 
         {/* Profile Tags - Searchable Skills */}
         <section>
-          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-6 flex items-center gap-2">
+          <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6 flex items-center gap-2">
             Profile Tags
           </h3>
           <div className="mb-4 relative">
-            <label className="block text-xs font-bold text-gray-700 mb-1.5">Search skills, tools, roles</label>
+            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Search skills, tools, roles</label>
 
             <div className="flex flex-wrap gap-2 mb-3">
               {formData.skills.map(skill => (
-                <span key={skill} className="bg-white text-gray-700 px-3 py-1.5 rounded-full text-sm font-medium border border-gray-200 flex items-center gap-2 shadow-sm">
+                <span key={skill} className="bg-white dark:bg-[#111] text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-full text-sm font-medium border border-gray-200 dark:border-gray-800 flex items-center gap-2 shadow-sm">
                   {getSkillIcon(skill)}
                   {formatDisplayName(skill)}
-                  <button onClick={() => removeSkill(skill)} className="text-gray-400 hover:text-red-500 ml-1 transition-colors">
+                  <button onClick={() => removeSkill(skill)} className="text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 ml-1 transition-colors">
                     <FaTimes size={10} />
                   </button>
                 </span>
@@ -476,18 +577,18 @@ export default function ProfileSettingsPage() {
               }}
               onFocus={() => setShowSkillSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSkillSuggestions(false), 200)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
+              className="w-full border border-gray-300 dark:border-gray-800 bg-white dark:bg-white/5 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-green-500 focus:ring-0 outline-none transition-colors"
               onKeyDown={handleSkillKeyDown}
             />
 
             {showSkillSuggestions && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-64 overflow-y-auto z-10">
+              <div className="absolute top-full left-0 right-0 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg mt-1 max-h-64 overflow-y-auto z-10">
                 {/* Show "Create tag" option if users want to add something not in API */}
                 {/* Show "Create tag" option if users want to add something not in API */}
                 {/* Show "Create tag" option if users want to add something not in API */}
                 {skillQuery && !skillSuggestions.some(s => s.name.toLowerCase() === skillQuery.toLowerCase()) && !formData.skills.some(s => s.toLowerCase() === skillQuery.toLowerCase()) && (
                   <div
-                    className="px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm font-medium text-green-600 border-b border-gray-50"
+                    className="px-3 py-2 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer text-sm font-medium text-green-600 border-b border-gray-50 dark:border-gray-900"
                     onMouseDown={(e) => { e.preventDefault(); addSkill(skillQuery); }}
                   >
                     + Create tag "{skillQuery}"
@@ -499,7 +600,7 @@ export default function ProfileSettingsPage() {
                   .map((item, idx) => (
                     <div
                       key={item.name || idx}
-                      className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 flex items-center gap-2 transition-colors"
+                      className="px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2 transition-colors"
                       onMouseDown={(e) => { e.preventDefault(); addSkill(item.name); }}
                     >
                       {/* Optional: Show icon in search dropdown too */}
@@ -511,7 +612,7 @@ export default function ProfileSettingsPage() {
             )}
 
             <div className="mt-4">
-              <h4 className="text-xs font-semibold text-gray-500 mb-2">Suggested Skills</h4>
+              <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">Suggested Skills</h4>
               <div className="flex flex-wrap gap-2">
                 {suggestedSkills.length === 0 ? (
                   <div className="text-xs text-gray-400 italic">Loading suggestions...</div>
@@ -523,7 +624,7 @@ export default function ProfileSettingsPage() {
                       <button
                         key={skill}
                         onClick={() => addSkill(skill)}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:border-gray-300 hover:bg-gray-50 transition-all"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/5 text-sm text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/10 transition-all"
                       >
                         {getSkillIcon(skill)}
                         {skill}
@@ -536,14 +637,14 @@ export default function ProfileSettingsPage() {
           </div>
         </section>
 
-        <hr className="border-gray-100" />
+        <hr className="border-gray-100 dark:border-gray-900" />
 
         {/* Social Links */}
         <section>
-          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-6 flex items-center gap-2">
+          <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6 flex items-center gap-2">
             Social Links
           </h3>
-          <p className="text-xs text-gray-500 mb-4 font-medium">Note: You only need to add your <span className="text-gray-900 font-bold">username</span>.</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 font-medium">Note: You only need to add your <span className="text-gray-900 dark:text-white font-bold">username</span>.</p>
 
           <div className="grid grid-cols-2 gap-4">
             {[
@@ -561,13 +662,13 @@ export default function ProfileSettingsPage() {
             ].map((social) => (
               <div
                 key={social.name}
-                className="flex items-center w-full border border-gray-300 rounded-lg px-3 py-2 bg-white focus-within:border-green-500 focus-within:ring-1 focus-within:ring-green-500 transition-all"
+                className="flex items-center w-full border border-gray-300 dark:border-gray-800 rounded-lg px-3 py-2 bg-white dark:bg-white/5 focus-within:border-green-500 focus-within:ring-1 focus-within:ring-green-500 transition-all"
               >
-                <div className="text-gray-400 mr-2.5 flex-shrink-0">
+                <div className="text-gray-400 dark:text-gray-500 mr-2.5 flex-shrink-0">
                   {social.icon}
                 </div>
                 {social.prefix && (
-                  <span className="text-gray-400 text-sm select-none mr-0.5">{social.prefix}</span>
+                  <span className="text-gray-400 dark:text-gray-500 text-sm select-none mr-0.5">{social.prefix}</span>
                 )}
                 <input
                   type="text"
@@ -575,7 +676,7 @@ export default function ProfileSettingsPage() {
                   value={formData.socialLinks[social.name] || ""}
                   onChange={handleChange}
                   placeholder={social.placeholder || "username"}
-                  className="flex-1 min-w-0 text-sm text-gray-900 placeholder:text-gray-300 outline-none bg-transparent"
+                  className="flex-1 min-w-0 text-sm text-gray-900 dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600 outline-none bg-transparent"
                 />
               </div>
             ))}
@@ -583,13 +684,18 @@ export default function ProfileSettingsPage() {
         </section>
 
         {/* Sticky Footer Save - positioned absolute relative to container */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 rounded-b-xl flex justify-end">
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-[#0A0A0A] border-t border-gray-200 dark:border-gray-900 rounded-b-xl flex justify-end transition-colors">
           <button
             onClick={handleSave}
-            disabled={saving}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm"
+            disabled={saving || saved}
+            className={`font-bold py-2 px-6 rounded-lg transition-all text-sm flex items-center gap-2 ${saved ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400" : "bg-green-600 hover:bg-green-700 text-white"
+              }`}
           >
-            {saving ? "Saving..." : "Save"}
+            {saving ? "Saving..." : saved ? (
+              <>
+                Saved! <span className="text-lg leading-none">✓</span>
+              </>
+            ) : "Save"}
           </button>
         </div>
       </div>

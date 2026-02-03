@@ -4,16 +4,28 @@ import { useEffect, useState } from "react";
 import DomeGallery from "../components/DomeGallery";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { getUser } from "../utils/auth";
 
 export default function Landing() {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [available, setAvailable] = useState(null);
   const [mounted, setMounted] = useState(false);
 
   const [users, setUsers] = useState([]);
   const [userCount, setUserCount] = useState(0);
+  const [selectedImg, setSelectedImg] = useState(null);
 
   useEffect(() => {
+    // Redirect logged-in users to /scroll
+    const user = getUser();
+    if (user) {
+      router.push("/scroll");
+      return;
+    }
+
     setMounted(true);
     // Fetch recent users
     fetch("http://localhost:5000/api/users/recent")
@@ -50,56 +62,62 @@ export default function Landing() {
     ...Array.from({ length: Math.max(0, 30 - users.length) }),
   ].slice(0, 30);
 
+  // Use mounted state to prevent hydration mismatch
+  // The server renders null, and the client renders null until useEffect runs
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen w-full bg-[#f9fafb] text-gray-900 flex flex-col items-center">
+    <div className="min-h-screen w-full bg-[#f9fafb] dark:bg-[#000000] text-gray-900 dark:text-gray-100 flex flex-col items-center transition-colors duration-300">
       {/* Header */}
       <Header />
 
       {/* Background Pattern */}
       <div
-        className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"
+        className="absolute inset-0 z-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='currentColor' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
       ></div>
 
       {/* Hero Section */}
       <section className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-20 w-full max-w-[600px]">
         {/* Animated Badge (optional) */}
-        <div className="mb-6 inline-flex items-center rounded-full border border-green-200 bg-green-50 px-3 py-1 text-sm text-green-800 animate-fade-in-up">
+        <div className="mb-6 inline-flex items-center rounded-full border border-green-200 dark:border-green-500/20 bg-green-50 dark:bg-green-500/10 px-3 py-1 text-sm text-green-800 dark:text-green-400 animate-fade-in-up">
           <span className="flex h-2 w-2 rounded-full bg-green-600 mr-2"></span>
           Join the fastest growing network
         </div>
 
         {/* Heading */}
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-[1.15] mb-4 text-gray-900">
-          <span className="font-serif italic text-gray-700">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-[1.15] mb-4 text-gray-900 dark:text-white">
+          <span className="font-serif italic text-gray-700 dark:text-gray-300">
             The Professional Network
           </span>
           <br />
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-400 dark:to-white">
             for builders to show & tell!
           </span>
         </h1>
 
-        <p className="text-gray-500 mt-4 text-lg max-w-md mx-auto leading-relaxed">
+        <p className="text-gray-500 dark:text-gray-400 mt-4 text-lg max-w-md mx-auto leading-relaxed">
           Showcase your work, launch projects, find jobs, and connect with
           incredible people in tech and design.
         </p>
 
         {/* Username Input Card */}
-        <div className="w-full max-w-[440px] mt-10 p-1.5 bg-white rounded-xl border border-gray-200 shadow-xl shadow-gray-200/50 transition-all focus-within:ring-4 focus-within:ring-green-500/10 focus-within:border-green-500/50">
+        <div className="w-full max-w-[440px] mt-10 p-1.5 bg-white dark:bg-[#0A0A0A] rounded-xl border border-gray-200 dark:border-gray-800 shadow-xl shadow-gray-200/50 dark:shadow-none transition-all focus-within:ring-4 focus-within:ring-green-500/10 focus-within:border-green-500/50">
           <div className="flex items-center w-full">
             {/* Prefix */}
-            <div className="flex items-center gap-2 px-3 py-2 bg-gray-50/50 rounded-lg mr-2 border border-gray-100">
+            <div className="flex items-center gap-2 px-3 py-2 bg-gray-50/50 dark:bg-white/5 rounded-lg mr-2 border border-gray-100 dark:border-gray-800">
               <Image
                 src="/assets/logo.png"
                 alt="Logo"
                 width={18}
                 height={18}
-                className="rounded-full"
+                className="rounded-lg"
               />
-              <span className="text-sm font-semibold text-gray-600 tracking-tight">
+              <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 tracking-tight">
                 proconnect.io/
               </span>
             </div>
@@ -108,7 +126,7 @@ export default function Landing() {
             <input
               type="text"
               placeholder="username"
-              className="flex-1 outline-none text-base bg-transparent text-gray-900 placeholder-gray-400 font-medium"
+              className="flex-1 outline-none text-base bg-transparent text-gray-900 dark:text-white placeholder-gray-400 font-medium"
               value={username}
               onChange={(e) =>
                 setUsername(
@@ -143,15 +161,15 @@ export default function Landing() {
         </div>
 
         {/* Feedback Messages */}
-        <div className="h-6 mt-3">
+        <div className="h-6 mt-3 mb-10">
           {available === true && (
-            <p className="text-green-600 text-sm font-medium animate-in fade-in slide-in-from-top-1 bg-green-50 px-3 py-1 rounded-full inline-block border border-green-100">
+            <p className="text-green-600 dark:text-green-400 text-sm font-medium animate-in fade-in slide-in-from-top-1 bg-green-50 dark:bg-green-500/10 px-3 py-1 rounded-full inline-block border border-green-100 dark:border-green-500/20">
               🎉 <span className="font-bold">{username}</span> is available!
               Claim it now.
             </p>
           )}
           {available === false && (
-            <p className="text-red-500 text-sm font-medium animate-in fade-in slide-in-from-top-1 bg-red-50 px-3 py-1 rounded-full inline-block border border-red-100">
+            <p className="text-red-500 dark:text-red-400 text-sm font-medium animate-in fade-in slide-in-from-top-1 bg-red-50 dark:bg-red-500/10 px-3 py-1 rounded-full inline-block border border-red-100 dark:border-red-500/20">
               😕 <span className="font-bold">{username}</span> is taken. Try
               another?
             </p>
@@ -163,29 +181,176 @@ export default function Landing() {
           )}
         </div>
 
-        {/* Community Grid */}
-        <div className="mt-16 w-full">
-          <p className="text-sm font-semibold text-gray-500 mb-6 uppercase tracking-wider text-center">
+        {/* Added Peer Count here to fill space */}
+        <div className="mt-8 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-300">
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] dark:text-white/40">
             Join {userCount > 200 ? "200+" : `${userCount}+`} peers
           </p>
         </div>
       </section>
-      <section className="relative z-10 w-full">
-        <DomeGallery
-          images={users.map((user) => ({
-            src:
-              user.profilePicture ||
-              user.avatarUrl ||
-              `https://ui-avatars.com/api/?name=${user.name}`,
-            alt: user.name || user.username || "User",
-          }))}
-        />
+
+      {/* Feature Showcase Sections */}
+      <section className="relative z-10 w-full max-w-2xl px-6 space-y-32 mb-32">
+        {/* Section 1: All your work at one place */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">All your work at one place</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+              Showcase your proof-of-work from different platforms and keep your ProConnect profile always updated with your latest work.
+            </p>
+          </div>
+          <div
+            className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl transition-transform hover:scale-[1.02] duration-500 cursor-pointer"
+            onClick={() => setSelectedImg("/assets/work_grid.png")}
+          >
+            <Image
+              src="/assets/work_grid.png"
+              alt="All your work at one place"
+              fill
+              className="object-cover"
+              onError={(e) => {
+                e.target.src = "https://placehold.co/800x600/000000/FFFFFF?text=Proof+of+Work+Preview";
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Section 2: Resume with Verified Credentials! */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div
+            className="order-2 md:order-1 relative aspect-[4/3] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl transition-transform hover:scale-[1.02] duration-500 cursor-pointer"
+            onClick={() => setSelectedImg("/assets/resume_verified.png")}
+          >
+            <Image
+              src="/assets/resume_verified.png"
+              alt="Resume with Verified Credentials!"
+              fill
+              className="object-cover"
+              onError={(e) => {
+                e.target.src = "https://placehold.co/800x600/000000/FFFFFF?text=Verified+Resume+Preview";
+              }}
+            />
+          </div>
+          <div className="order-1 md:order-2">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Resume with Verified Credentials!</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+              Improve your credibility by verifying your workplace, education, and bootcamps you've been part of.
+            </p>
+          </div>
+        </div>
+
+        {/* Section 3: Launchpad */}
+        <div className="flex flex-col items-center text-center">
+          <div className="flex items-center gap-2 mb-6 bg-gray-50 dark:bg-white/5 px-4 py-1.5 rounded-full border border-gray-100 dark:border-gray-800">
+            <Image src="/assets/logo.png" width={16} height={16} alt="Logo" />
+            <span className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Launchpad</span>
+          </div>
+          <div className="mb-10 w-full max-w-2xl px-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Working on a project?</h2>
+              <Link href="/launchpad" className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black rounded-full font-bold text-sm flex items-center gap-2 hover:scale-105 transition-all shadow-lg">
+                Launchpad <span className="text-lg">→</span>
+              </Link>
+            </div>
+            <p className="text-gray-500 dark:text-gray-400 text-lg md:text-xl leading-relaxed">
+              If you're building projects and are looking for the first 100 users who will share genuine feedback with you, then launch your projects on ProConnect Launchpad on Monday, every week!
+            </p>
+          </div>
+          <div
+            className="w-full relative aspect-[16/10] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl transition-all hover:scale-[1.01] hover:shadow-green-500/10 duration-500 cursor-pointer"
+            onClick={() => router.push("/launchpad")}
+          >
+            <Image
+              src="/assets/launchpad_preview.png"
+              alt="Launchpad"
+              fill
+              className="object-cover"
+              onError={(e) => {
+                e.target.src = "https://placehold.co/1200x800/000000/FFFFFF?text=Launchpad+Leaderboard+Preview";
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Section 4: Scroll */}
+        <div className="flex flex-col items-center text-center">
+          <div className="flex items-center gap-2 mb-6 bg-gray-50 dark:bg-white/5 px-4 py-1.5 rounded-full border border-gray-100 dark:border-gray-800">
+            <Image src="/assets/logo.png" width={16} height={16} alt="Logo" />
+            <span className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Scroll</span>
+          </div>
+          <div className="mb-10 w-full max-w-2xl px-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Share your work!</h2>
+              <Link href="/scroll" className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black rounded-full font-bold text-sm flex items-center gap-2 hover:scale-105 transition-all shadow-lg">
+                Go to Scroll <span className="text-lg">→</span>
+              </Link>
+            </div>
+            <p className="text-gray-500 dark:text-gray-400 text-lg md:text-xl leading-relaxed">
+              This is not your typical content feed. It's a place to show what you are working on, share feedback, ask questions, give answers, share opportunities, and more!
+            </p>
+          </div>
+          <div
+            className="w-full relative aspect-[16/10] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl transition-all hover:scale-[1.01] hover:shadow-green-500/10 duration-500 cursor-pointer"
+            onClick={() => router.push("/scroll")}
+          >
+            <Image
+              src="/assets/scroll_preview.png"
+              alt="Scroll"
+              fill
+              className="object-cover"
+              onError={(e) => {
+                e.target.src = "https://placehold.co/1200x800/000000/FFFFFF?text=Scroll+Feed+Preview";
+              }}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Community Section */}
+      <section className="relative z-10 w-full py-20 bg-gray-50/50 dark:bg-white/5 border-y border-gray-100 dark:border-gray-800">
+        <div className="max-w-6xl mx-auto text-center px-4">
+          <div className="w-full">
+            <DomeGallery
+              images={users.map((user) => ({
+                src:
+                  user.profilePicture ||
+                  user.avatarUrl ||
+                  `https://ui-avatars.com/api/?name=${user.name}`,
+                alt: user.name || user.username || "User",
+              }))}
+            />
+          </div>
+        </div>
       </section>
 
       {/* Footer */}
-      <div className="w-full mt-20">
+      <div className="w-full">
         <Footer />
       </div>
+
+      {/* Lightbox Overlay */}
+      {selectedImg && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300"
+          onClick={() => setSelectedImg(null)}
+        >
+          <button
+            className="absolute top-6 right-6 text-white text-4xl hover:scale-110 transition-transform"
+            onClick={() => setSelectedImg(null)}
+          >
+            &times;
+          </button>
+          <div className="relative w-full max-w-6xl aspect-[4/3] md:aspect-[16/10]">
+            <Image
+              src={selectedImg}
+              alt="Enlarged view"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

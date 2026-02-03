@@ -159,7 +159,7 @@ router.put("/me", authMiddleware, async (req, res) => {
     const allowedUpdates = [
       "name", "firstName", "lastName", "bio", "avatarUrl", "linkedinUrl",
       "location", "pronouns", "website", "calendarLink", "socialLinks",
-      "skills", "interests", "projects"
+      "skills", "interests", "projects", "resumeUrl"
     ];
 
     const updates = {};
@@ -189,6 +189,7 @@ router.put("/me", authMiddleware, async (req, res) => {
       website: updated.website,
       calendarLink: updated.calendarLink,
       socialLinks: updated.socialLinks,
+      resumeUrl: updated.resumeUrl,
       role: updated.role,
     });
   } catch (err) {

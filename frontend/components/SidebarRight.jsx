@@ -110,7 +110,7 @@ export default function SidebarRight({ children }) {
     };
 
     return (
-        <div className="sticky top-0 h-screen flex flex-col border-l border-gray-200 bg-[#FAFAFA] relative">
+        <div className="sticky top-0 h-screen flex flex-col border-l border-gray-200 dark:border-gray-800 bg-[#FAFAFA] dark:bg-[#000000] relative transition-colors duration-300">
             {/* Full-Cover Overlays */}
             {showProfileMenu && (
                 <div className="absolute top-0 right-0 left-0 z-50">
@@ -132,16 +132,16 @@ export default function SidebarRight({ children }) {
             )}
 
             {/* Header Part - Matches Main Header */}
-            <div className="bg-[#FAFAFA]/95 backdrop-blur-md z-30 border-b border-gray-200/50 px-6 h-16 flex items-center flex-none">
+            <div className="bg-[#FAFAFA]/95 dark:bg-[#000000]/95 backdrop-blur-md z-30 border-b border-gray-200/50 dark:border-gray-800/50 px-6 h-16 flex items-center flex-none">
                 <div className="flex items-center gap-3 w-full" ref={menuRef}>
                     {/* Search Bar Container */}
                     <div className="flex-1 relative" ref={searchRef}>
-                        <div className={`flex items-center bg-white border border-gray-200 rounded-full px-3 py-2 shadow-sm focus-within:shadow-md focus-within:border-gray-300 transition-all ${isSearchFocused ? 'w-full' : ''}`}>
+                        <div className={`flex items-center bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-800 rounded-full px-3 py-2 shadow-sm focus-within:shadow-md focus-within:border-gray-300 dark:focus-within:border-gray-600 transition-all ${isSearchFocused ? 'w-full' : ''}`}>
                             <FaSearch className="text-gray-400 text-xs" />
                             <input
                                 type="text"
                                 placeholder="Search users..."
-                                className="ml-2 w-full text-xs outline-none bg-transparent placeholder:text-gray-400 text-gray-700"
+                                className="ml-2 w-full text-xs outline-none bg-transparent placeholder:text-gray-400 text-gray-700 dark:text-gray-200"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onFocus={() => {
@@ -153,7 +153,7 @@ export default function SidebarRight({ children }) {
 
                         {/* Search Results Dropdown */}
                         {showResults && (
-                            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#0A0A0A] rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
                                 {isSearching ? (
                                     <div className="p-4 text-center text-xs text-gray-500">Searching...</div>
                                 ) : searchResults.length > 0 ? (
@@ -162,22 +162,22 @@ export default function SidebarRight({ children }) {
                                             <div
                                                 key={result._id}
                                                 onClick={() => handleUserClick(result.username)}
-                                                className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 cursor-pointer transition-colors"
+                                                className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors"
                                             >
-                                                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-100 flex-shrink-0">
+                                                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-100 dark:border-gray-800 flex-shrink-0">
                                                     <img
                                                         src={
                                                             (result.profilePicture && result.profilePicture.length > 0 ? result.profilePicture : null) ||
                                                             (result.avatarUrl && result.avatarUrl.length > 0 ? result.avatarUrl : null) ||
-                                                            `https://ui-avatars.com/api/?name=${encodeURIComponent(result.name || 'User')}`
+                                                            `https://ui-avatars.com/api/?name=${encodeURIComponent(result.name || 'User')}&size=128&background=random&bold=true`
                                                         }
                                                         alt={result.name}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900 truncate">{result.name}</p>
-                                                    <p className="text-xs text-gray-500 truncate">@{result.username}</p>
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{result.name}</p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{result.username}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -194,19 +194,19 @@ export default function SidebarRight({ children }) {
                         <div className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
                             <button
                                 onClick={() => setShowStreakMenu(true)}
-                                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-all"
+                                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-800 rounded-full hover:bg-gray-50 dark:hover:bg-white/10 transition-all"
                             >
                                 <span className="text-sm font-bold text-orange-400">{streakCount > 0 ? '🔥' : '🥚'}</span>
-                                <span className="text-xs font-bold text-gray-700">{streakCount}</span>
+                                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{streakCount}</span>
                             </button>
 
                             <button
                                 onClick={handleNotificationClick}
-                                className="relative w-9 h-9 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 hover:text-gray-900 hover:shadow-sm transition-all"
+                                className="relative w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:shadow-sm transition-all"
                             >
                                 <FaBell size={16} />
                                 {unreadCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white ring-2 ring-white">
+                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white ring-2 ring-white dark:ring-black">
                                         {unreadCount > 10 ? "10+" : unreadCount}
                                     </span>
                                 )}
@@ -215,20 +215,20 @@ export default function SidebarRight({ children }) {
                             <div className="relative">
                                 <button
                                     onClick={() => setShowProfileMenu(!showProfileMenu)}
-                                    className="relative w-9 h-9 rounded-full border border-gray-200 overflow-hidden hover:ring-2 hover:ring-gray-100 transition-all cursor-pointer"
+                                    className="relative w-9 h-9 rounded-full border border-gray-200 dark:border-gray-800 overflow-hidden hover:ring-2 hover:ring-gray-100 dark:hover:ring-white/10 transition-all cursor-pointer"
                                 >
                                     {user ? (
                                         <img
                                             src={
                                                 (user.profilePic && user.profilePic.length > 0 ? user.profilePic : null) ||
                                                 (user.avatarUrl && user.avatarUrl.length > 0 ? user.avatarUrl : null) ||
-                                                `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}`
+                                                `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&size=128&background=random&bold=true`
                                             }
                                             alt="Profile"
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (
-                                        <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
+                                        <div className="w-full h-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-400">
                                             <span className="text-xs">?</span>
                                         </div>
                                     )}
@@ -244,10 +244,10 @@ export default function SidebarRight({ children }) {
                 {children}
 
                 {/* Footer Links */}
-                <div className="flex flex-wrap gap-2 text-[11px] text-gray-400 px-2 font-medium">
-                    <span className="cursor-pointer hover:text-gray-600">Privacy</span> •
-                    <span className="cursor-pointer hover:text-gray-600">Terms</span> •
-                    <span className="cursor-pointer hover:text-gray-600">About</span> •
+                <div className="flex flex-wrap gap-2 text-[11px] text-gray-400 dark:text-gray-500 px-2 font-medium">
+                    <span className="cursor-pointer hover:text-gray-600 dark:hover:text-gray-300">Privacy</span> •
+                    <span className="cursor-pointer hover:text-gray-600 dark:hover:text-gray-300">Terms</span> •
+                    <span className="cursor-pointer hover:text-gray-600 dark:hover:text-gray-300">About</span> •
                     <span>© {new Date().getFullYear()} ProConnect</span>
                 </div>
             </div>
