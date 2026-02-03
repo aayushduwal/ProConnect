@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String },
     bio: { type: String, default: "" },
     avatarUrl: { type: String, default: "" },
+    resumeUrl: { type: String, default: "" },
     linkedinUrl: { type: String, default: "" },
     verified: { type: Boolean, default: false },
     location: { type: String, default: "" },

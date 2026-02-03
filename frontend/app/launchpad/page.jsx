@@ -31,11 +31,11 @@ export default function LaunchpadPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen bg-[#FAFAFA] dark:bg-black transition-colors duration-300">
             {/* STICKY TOP HEADER */}
-            <div className="sticky top-0 bg-[#FAFAFA]/95 backdrop-blur-md z-30 border-b border-gray-200/50 h-16 flex items-center">
+            <div className="sticky top-0 bg-[#FAFAFA]/95 dark:bg-black/95 backdrop-blur-md z-30 border-b border-gray-200/50 dark:border-gray-800/50 h-16 flex items-center transition-colors">
                 <div className="max-w-3xl mx-auto w-full px-4 md:px-8 flex justify-between items-center">
-                    <h1 className="font-bold text-gray-900 text-xl tracking-tight flex items-center gap-2">
+                    <h1 className="font-bold text-gray-900 dark:text-white text-xl tracking-tight flex items-center gap-2">
                         <FaRocket className="text-orange-500" size={18} />
                         Launchpad
                     </h1>
@@ -54,20 +54,20 @@ export default function LaunchpadPage() {
                 {/* Intro Section */}
                 <div className="mb-8">
                     <div className="flex items-center justify-between mb-2">
-                        <h2 className="text-lg font-bold text-gray-900">Weekly Top Projects</h2>
-                        <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Weekly Top Projects</h2>
+                        <div className="flex items-center gap-2 text-xs font-bold text-gray-400 dark:text-gray-500">
                             <FaSortAmountDown />
                             <span>TRENDING</span>
                         </div>
                     </div>
-                    <p className="text-sm text-gray-500">Discover and upvote the best projects from the ProConnect community.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Discover and upvote the best projects from the ProConnect community.</p>
                 </div>
 
                 {/* Projects List */}
                 <div className="space-y-4">
                     {loading ? (
                         <div className="flex justify-center py-20">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 dark:border-green-400"></div>
                         </div>
                     ) : projects.length > 0 ? (
                         projects.map((project, index) => (
@@ -79,13 +79,13 @@ export default function LaunchpadPage() {
                             />
                         ))
                     ) : (
-                        <div className="text-center py-20 bg-white rounded-[24px] border-2 border-dashed border-gray-100">
+                        <div className="text-center py-20 bg-white dark:bg-[#0A0A0A] rounded-[24px] border-2 border-dashed border-gray-100 dark:border-gray-800 transition-colors">
                             <div className="text-4xl mb-4">🚀</div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-1">No projects launched yet</h3>
-                            <p className="text-gray-500 text-sm mb-6">Be the first to launch your project!</p>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">No projects launched yet</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Be the first to launch your project!</p>
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 transition-colors"
+                                className="bg-black dark:bg-white dark:text-black text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
                             >
                                 Submit your project
                             </button>

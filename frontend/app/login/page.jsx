@@ -62,7 +62,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-gray-900">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-[#000000] text-gray-900 dark:text-white transition-colors duration-300">
       {/* Header/Navbar */}
       <Header />
 
@@ -70,21 +70,21 @@ export default function Login() {
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
         {/* Welcome Text */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-semibold text-gray-400">
+          <h2 className="text-3xl font-semibold text-gray-400 dark:text-gray-500 transition-colors">
             Welcome back!
           </h2>
-          <p className="text-3xl font-semibold text-gray-900">
+          <p className="text-3xl font-semibold text-gray-900 dark:text-white transition-colors">
             Login to your account.
           </p>
         </div>
 
         {/* Login Box */}
-        <div className="w-full max-w-sm bg-white border border-gray-200 rounded-2xl shadow-md p-8 space-y-3">
+        <div className="w-full max-w-sm bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-md p-8 space-y-3 transition-colors">
           {/* Google Button */}
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center border border-gray-300 rounded-2xl py-2 bg-white hover:bg-gray-100 transition"
+            className="w-full flex items-center justify-center border border-gray-300 dark:border-gray-700 rounded-2xl py-2 bg-white dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition"
           >
             <Image
               src="https://www.svgrepo.com/show/355037/google.svg"
@@ -98,18 +98,18 @@ export default function Login() {
 
           {/* Divider */}
           <div className="my-4 flex items-center">
-            <div className="flex-grow h-px bg-gray-200"></div>
-            <span className="px-3 text-sm text-gray-400">
+            <div className="flex-grow h-px bg-gray-200 dark:bg-gray-800"></div>
+            <span className="px-3 text-sm text-gray-400 dark:text-gray-600">
               or continue with email
             </span>
-            <div className="flex-grow h-px bg-gray-200"></div>
+            <div className="flex-grow h-px bg-gray-200 dark:bg-gray-800"></div>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email
               </label>
               <input
@@ -118,13 +118,13 @@ export default function Login() {
                 value={formData.identifier}
                 onChange={handleChange}
                 required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Password
               </label>
               <div className="relative">
@@ -134,12 +134,12 @@ export default function Login() {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 pr-10 bg-white dark:bg-white/5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 bg-transparent p-1 focus:outline-none"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 bg-transparent p-1 focus:outline-none"
                 >
                   {showPassword ? (
                     <AiOutlineEyeInvisible
@@ -154,7 +154,7 @@ export default function Login() {
               <div className="text-right mt-1">
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-gray-500 hover:underline"
+                  className="text-sm text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                 >
                   Forgot Password?
                 </Link>
@@ -165,7 +165,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full bg-gray-900 hover:bg-black text-white font-semibold py-2 rounded-2xl transition ${loading ? "opacity-70 cursor-not-allowed" : ""
+              className={`w-full bg-gray-900 dark:bg-white dark:text-black hover:bg-black dark:hover:bg-gray-200 text-white font-semibold py-2 rounded-2xl transition ${loading ? "opacity-70 cursor-not-allowed" : ""
                 }`}
             >
               {loading ? "Logging in..." : "Login →"}
@@ -174,7 +174,7 @@ export default function Login() {
 
           {/* Message */}
           {message && (
-            <p className="mt-3 text-center text-sm text-gray-600">{message}</p>
+            <p className="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">{message}</p>
           )}
         </div>
 
@@ -185,7 +185,7 @@ export default function Login() {
           </span>
           <Link
             href="/signup"
-            className="text-gray-600 hover:underline font-medium"
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:underline font-medium transition-colors"
           >
             Create One!
           </Link>

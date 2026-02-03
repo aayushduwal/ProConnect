@@ -55,11 +55,11 @@ export default function SearchPage() {
     }, [activeFilter]);
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen bg-[#FAFAFA] dark:bg-black transition-colors duration-300">
             {/* STICKY TOP HEADER */}
-            <div className="sticky top-0 bg-[#FAFAFA]/95 backdrop-blur-md z-30 border-b border-gray-200/50 h-16 flex items-center">
+            <div className="sticky top-0 bg-[#FAFAFA]/95 dark:bg-black/95 backdrop-blur-md z-30 border-b border-gray-200/50 dark:border-gray-800/50 h-16 flex items-center transition-colors">
                 <div className="max-w-3xl mx-auto w-full px-4 md:px-8 flex justify-between items-center">
-                    <h1 className="font-bold text-gray-900 text-xl tracking-tight">
+                    <h1 className="font-bold text-gray-900 dark:text-white text-xl tracking-tight transition-colors">
                         Search
                     </h1>
                     <div className="hidden md:flex flex-1 justify-center">
@@ -71,13 +71,13 @@ export default function SearchPage() {
             {/* CONTENT AREA */}
             <div className="flex-1 px-4 md:px-8 py-6 max-w-3xl mx-auto w-full">
                 {/* Search Bar Container */}
-                <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 p-3 mb-8">
+                <div className="bg-white dark:bg-[#0A0A0A] rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-800 p-3 mb-8 transition-colors">
                     <div className="flex items-center gap-3 px-3 py-2">
-                        <FaSearch className="text-gray-900" size={16} />
+                        <FaSearch className="text-gray-900 dark:text-gray-100" size={16} />
                         <input
                             type="text"
                             placeholder={`Search ${activeFilter.toLowerCase()}`}
-                            className="flex-1 bg-transparent outline-none text-gray-900 font-medium placeholder:text-[#94A3B8]"
+                            className="flex-1 bg-transparent outline-none text-gray-900 dark:text-gray-100 font-medium placeholder:text-[#94A3B8] dark:placeholder:text-gray-500"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -85,7 +85,7 @@ export default function SearchPage() {
                         {query && (
                             <button
                                 onClick={() => setQuery("")}
-                                className="bg-gray-50 text-gray-900 p-1 rounded-md hover:bg-gray-100 transition-colors"
+                                className="bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-gray-100 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
                             >
                                 <FaTimes size={14} />
                             </button>
@@ -99,8 +99,8 @@ export default function SearchPage() {
                                     key={filter.name}
                                     onClick={() => setActiveFilter(filter.name)}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all border whitespace-nowrap ${activeFilter === filter.name
-                                        ? "bg-[#111] text-white border-[#111]"
-                                        : "bg-white text-gray-900 border-gray-200 hover:border-gray-300"
+                                        ? "bg-[#111] dark:bg-white text-white dark:text-black border-[#111] dark:border-white shadow-sm"
+                                        : "bg-white dark:bg-white/5 text-gray-900 dark:text-gray-300 border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600"
                                         }`}
                                 >
                                     {filter.icon}
@@ -125,9 +125,9 @@ export default function SearchPage() {
                         </div>
                     ) : results.length > 0 ? (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2 transition-colors">
                                 Showing results for "{query}"
-                                <span className="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-full">{results.length} found</span>
+                                <span className="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-white/5 px-2 py-1 rounded-full border border-gray-50 dark:border-gray-800">{results.length} found</span>
                             </h2>
 
                             {activeFilter === "People" ? (
@@ -136,7 +136,7 @@ export default function SearchPage() {
                                         <Link
                                             href={`/u/${user.username}`}
                                             key={user._id}
-                                            className="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-2xl hover:border-blue-200 hover:shadow-md transition-all group"
+                                            className="flex items-center gap-4 p-4 bg-white dark:bg-[#0A0A0A] border border-gray-100 dark:border-gray-800 rounded-2xl hover:border-blue-200 dark:hover:border-blue-500/50 hover:shadow-md transition-all group"
                                         >
                                             <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm transition-transform group-hover:scale-105">
                                                 <img
@@ -146,10 +146,10 @@ export default function SearchPage() {
                                                 />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors uppercase text-sm tracking-tight">{user.name}</h3>
-                                                <p className="text-xs text-gray-500">@{user.username}</p>
+                                                <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors uppercase text-sm tracking-tight">{user.name}</h3>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">@{user.username}</p>
                                                 {user.headline && (
-                                                    <p className="text-[11px] text-gray-400 mt-1 line-clamp-1">{user.headline}</p>
+                                                    <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1 line-clamp-1">{user.headline}</p>
                                                 )}
                                             </div>
                                             <div className="text-gray-300 group-hover:text-blue-500 transition-colors">
@@ -165,22 +165,22 @@ export default function SearchPage() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-20 bg-white shadow-sm rounded-[24px] border border-gray-100">
-                                    <div className="text-gray-400 text-4xl mb-4 italic">Soon</div>
-                                    <p className="text-gray-500 font-medium">Search for {activeFilter} is coming soon!</p>
+                                <div className="text-center py-20 bg-white dark:bg-[#0A0A0A] shadow-sm rounded-[24px] border border-gray-100 dark:border-gray-800 transition-colors">
+                                    <div className="text-gray-400 dark:text-gray-600 text-4xl mb-4 italic">Soon</div>
+                                    <p className="text-gray-500 dark:text-gray-400 font-medium">Search for {activeFilter} is coming soon!</p>
                                 </div>
                             )}
                         </div>
                     ) : query.trim() ? (
                         <div className="text-center py-20 animate-in fade-in duration-700">
-                            <div className="text-6xl mb-4 text-gray-200">🔍</div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">No results found</h3>
-                            <p className="text-gray-500">We couldn't find any {activeFilter.toLowerCase()} matching "{query}"</p>
+                            <div className="text-6xl mb-4 text-gray-200 dark:text-gray-800">🔍</div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No results found</h3>
+                            <p className="text-gray-500 dark:text-gray-400">We couldn't find any {activeFilter.toLowerCase()} matching "{query}"</p>
                         </div>
                     ) : (
                         <div className="text-center py-20">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2 italic">Search for something...</h3>
-                            <p className="text-gray-400">Try searching for people, skills, or posts</p>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 italic">Search for something...</h3>
+                            <p className="text-gray-400 dark:text-gray-500">Try searching for people, skills, or posts</p>
                         </div>
                     )}
                 </div>
