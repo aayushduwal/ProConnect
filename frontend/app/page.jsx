@@ -190,7 +190,7 @@ export default function Landing() {
       </section>
 
       {/* Feature Showcase Sections */}
-      <section className="relative z-10 w-full max-w-2xl px-6 space-y-32 mb-32">
+      <section className="relative z-10 w-full max-w-2xl px-6 space-y-23 mb-12">
         {/* Section 1: All your work at one place */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
@@ -200,16 +200,16 @@ export default function Landing() {
             </p>
           </div>
           <div
-            className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl transition-transform hover:scale-[1.02] duration-500 cursor-pointer"
+            className="relative aspect-[4/3] rounded-[32px] overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl transition-transform hover:scale-[1.02] duration-500 cursor-pointer bg-white dark:bg-[#0A0A0A]"
             onClick={() => setSelectedImg("/assets/work_grid.png")}
           >
             <Image
               src="/assets/work_grid.png"
               alt="All your work at one place"
               fill
-              className="object-cover"
+              className="object-contain p-2 md:p-3"
               onError={(e) => {
-                e.target.src = "https://placehold.co/800x600/000000/FFFFFF?text=Proof+of+Work+Preview";
+                e.target.src = "https://placehold.co/800x600/FFFFFF/000000?text=Proof+of+Work+Preview";
               }}
             />
           </div>
@@ -218,16 +218,16 @@ export default function Landing() {
         {/* Section 2: Resume with Verified Credentials! */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div
-            className="order-2 md:order-1 relative aspect-[4/3] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl transition-transform hover:scale-[1.02] duration-500 cursor-pointer"
+            className="order-2 md:order-1 relative aspect-[4/3] rounded-[32px] overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl transition-transform hover:scale-[1.02] duration-500 cursor-pointer bg-white dark:bg-[#0A0A0A]"
             onClick={() => setSelectedImg("/assets/resume_verified.png")}
           >
             <Image
               src="/assets/resume_verified.png"
               alt="Resume with Verified Credentials!"
               fill
-              className="object-cover"
+              className="object-contain p-2 md:p-3"
               onError={(e) => {
-                e.target.src = "https://placehold.co/800x600/000000/FFFFFF?text=Verified+Resume+Preview";
+                e.target.src = "https://placehold.co/800x600/FFFFFF/000000?text=Verified+Resume+Preview";
               }}
             />
           </div>
@@ -290,24 +290,64 @@ export default function Landing() {
             </p>
           </div>
           <div
-            className="w-full relative aspect-[16/10] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl transition-all hover:scale-[1.01] hover:shadow-green-500/10 duration-500 cursor-pointer"
+            className="w-full relative aspect-[16/10] rounded-[32px] overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl transition-all hover:scale-[1.01] hover:shadow-green-500/10 duration-500 cursor-pointer bg-white dark:bg-[#0A0A0A]"
             onClick={() => router.push("/scroll")}
           >
             <Image
               src="/assets/scroll_preview.png"
               alt="Scroll"
               fill
-              className="object-cover"
+              className="object-contain p-2 md:p-3"
               onError={(e) => {
-                e.target.src = "https://placehold.co/1200x800/000000/FFFFFF?text=Scroll+Feed+Preview";
+                e.target.src = "https://placehold.co/1200x800/FFFFFF/000000?text=Scroll+Feed+Preview";
               }}
             />
+          </div>
+        </div>
+
+        {/* Section 5: FAQ / About */}
+        <div className="flex flex-col space-y-12 text-left pt-8 border-t border-gray-100 dark:border-gray-800">
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">How is ProConnect different from LinkedIn?</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+              ProConnect is a community for all developers to tech professionals, especially students.
+              The platform is built with students and tech professionals in mind, offering a comprehensive profile
+              to showcase your work across the internet—whether it's projects, open-source
+              contributions, design work, or more.
+            </p>
+            <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+              ProConnect emphasizes a community-driven experience, promoting knowledge sharing,
+              collaboration, and credibility among tech professionals. It also ensures authenticity
+              with verified accounts, making it a more niche and purposeful space compared to LinkedIn's
+              broader, generalist approach.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">What is a ProConnect profile & why do I need one?</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+              Your work might be spread across GitHub, Dribbble, Medium, and other platforms.
+              ProConnect brings everything together into one profile with seamless integrations.
+              You can also highlight your verified work experience, education, and bootcamp
+              credentials in the Resume section, write articles, and showcase your interests—all on a single page.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">I joined ProConnect, what's next?</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+              Share what you're working on, learnings, and your projects. You can collaborate with
+              other tech professionals by giving feedback, offering help, or even trying out their
+              projects. You might also find opportunities to collaborate on different projects.
+              Plus, you can discover relevant job opportunities or post a job if you're hiring.
+              It's a community of tech professionals where you can network with like-minded individuals.
+            </p>
           </div>
         </div>
       </section>
 
       {/* Community Section */}
-      <section className="relative z-10 w-full py-20 bg-gray-50/50 dark:bg-white/5 border-y border-gray-100 dark:border-gray-800">
+      <section className="relative z-10 w-full py-16 bg-gray-50/50 dark:bg-white/5 border-y border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto text-center px-4">
           <div className="w-full">
             <DomeGallery

@@ -40,11 +40,9 @@ export default function Footer() {
                         <ul className="space-y-3.5">
                             {[
                                 { name: "Scroll", href: "/scroll" },
-                                { name: "Startup Jobs", href: "#" },
                                 { name: "Launchpad", href: "/launchpad" },
-                                { name: "Search People", href: "/search" },
-                                { name: "Blog", href: "#" },
-                                { name: "Challenges", href: "#" },
+                                { name: "Search Post/People", href: "/search" },
+                                { name: "Articles", href: "/articles" },
                             ].map((link) => (
                                 <li key={link.name}>
                                     <Link
@@ -65,12 +63,12 @@ export default function Footer() {
                         </h3>
                         <ul className="space-y-3.5">
                             {[
-                                { name: "Job Hunt AI", href: "#" },
-                                { name: "GitHub Recap", href: "#" },
-                                { name: "Layoffs Tracker", href: "#" },
-                                { name: "README Badge", href: "#" },
-                                { name: "Internships", href: "#" },
-                                { name: "Resume Builder", href: "#" },
+                                { name: "Verified Credentials", href: "/settings/profile" },
+                                { name: "Project Showcase", href: "/launchpad" },
+                                { name: "Daily Streaks", href: "/scroll" },
+                                { name: "Work Verification", href: "/settings/profile" },
+                                { name: "Article Publisher", href: "/articles" },
+                                { name: "Public Portfolio", href: "/profile" },
                             ].map((link) => (
                                 <li key={link.name}>
                                     <Link

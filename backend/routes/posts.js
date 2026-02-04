@@ -202,7 +202,7 @@ router.get("/:id", async (req, res) => {
 // POST create a new post
 router.post("/", verifyToken, async (req, res) => {
     try {
-        const { content, title, image, mediaType, mediaUrl, skills, technologies, category, poll } = req.body;
+        const { content, title, image, mediaType, mediaUrl, mediaUrls, skills, technologies, category, poll } = req.body;
 
         // Check if banned
         if (req.user.status === "banned") {
@@ -214,13 +214,22 @@ router.post("/", verifyToken, async (req, res) => {
             return res.status(400).json({ error: "Content or poll is required" });
         }
 
+        // Validate media limits
+        if (mediaType === 'video' && mediaUrls && mediaUrls.length > 1) {
+            return res.status(400).json({ error: "Only one video is allowed per post." });
+        }
+        if (mediaType === 'image' && mediaUrls && mediaUrls.length > 4) {
+            return res.status(400).json({ error: "Maximum 4 images are allowed per post." });
+        }
+
         const newPost = new Post({
             author: req.user._id, // Assumes auth middleware populates req.user
             content: content || "", // Allow empty content if poll exists
             title,
             image, // Legacy
-            mediaType: mediaType || (image ? 'image' : 'none'),
-            mediaUrl: mediaUrl || image,
+            mediaType: mediaType || (image ? 'image' : (mediaUrls?.length > 0 ? 'image' : 'none')),
+            mediaUrl: mediaUrl || image || (mediaUrls?.length > 0 ? mediaUrls[0] : ""),
+            mediaUrls: mediaUrls || [],
             skills,
             technologies,
             category,

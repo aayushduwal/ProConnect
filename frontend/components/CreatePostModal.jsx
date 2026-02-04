@@ -16,7 +16,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
     // Media States
     const [showMediaInput, setShowMediaInput] = useState(false);
     const [mediaType, setMediaType] = useState("none"); // 'image', 'video'
-    const [mediaUrl, setMediaUrl] = useState("");
+    const [mediaUrls, setMediaUrls] = useState([]); // Array for multiple images
 
     // Poll States
     const [showPollInput, setShowPollInput] = useState(false);
@@ -99,6 +99,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
             setShowMediaInput(false);
             setShowPollInput(false);
             setMediaType('none');
+            setMediaUrls([]);
         }
     }, [isOpen, initialMediaType]);
 
@@ -124,8 +125,14 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
             if (!res.ok) throw new Error("Upload failed");
 
             const data = await res.json();
-            setMediaUrl(data.url);
-            setMediaType(data.type || (file.type.startsWith('video') ? 'video' : 'image'));
+
+            if (mediaType === 'image' || (!showMediaInput && file.type.startsWith('image'))) {
+                setMediaUrls(prev => [...prev, data.url].slice(0, 4));
+                setMediaType('image');
+            } else {
+                setMediaUrls([data.url]);
+                setMediaType(data.type || 'video');
+            }
 
             // If the user selected the file, we can auto-show the input area or just rely on the preview
             if (!showMediaInput) setShowMediaInput(true);
@@ -162,8 +169,8 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
         try {
             const body = {
                 content,
-                mediaUrl,
-                mediaType: mediaUrl ? mediaType : 'none',
+                mediaUrls,
+                mediaType: mediaUrls.length > 0 ? mediaType : 'none',
                 category
             };
 
@@ -203,7 +210,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
         } finally {
             setLoading(false);
             setContent("");
-            setMediaUrl("");
+            setMediaUrls([]);
             setPollQuestion("");
             setPollOptions(["", ""]);
             setShowMediaInput(false);
@@ -289,21 +296,63 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
 
                             <div className="flex flex-col gap-3">
                                 <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={mediaUrl}
-                                        onChange={(e) => setMediaUrl(e.target.value)}
-                                        className="flex-1 p-2.5 border border-gray-200 dark:border-gray-800 rounded-lg outline-none focus:border-black dark:focus:border-gray-600 transition-colors text-sm bg-transparent text-gray-900 dark:text-white"
-                                        placeholder={`Paste ${mediaType} URL...`}
-                                        autoFocus
-                                    />
+                                    <div className="flex-1 flex flex-col gap-2">
+                                        <input
+                                            type="text"
+                                            value={""} // We don't use single URL input anymore for multi-upload
+                                            onChange={(e) => {
+                                                if (e.target.value.trim()) {
+                                                    if (mediaType === 'image') {
+                                                        if (mediaUrls.length < 4) setMediaUrls(prev => [...prev, e.target.value]);
+                                                    } else {
+                                                        setMediaUrls([e.target.value]);
+                                                    }
+                                                }
+                                            }}
+                                            className="w-full p-2.5 border border-gray-200 dark:border-gray-800 rounded-lg outline-none focus:border-black dark:focus:border-gray-600 transition-colors text-sm bg-transparent text-gray-900 dark:text-white"
+                                            placeholder={`Paste ${mediaType} URL...`}
+                                        />
+                                        <p className="text-[10px] text-gray-500">Paste URL and press enter (or just upload below)</p>
+                                    </div>
                                     <span className="self-center text-gray-400 dark:text-gray-600 text-sm">OR</span>
                                     <input
                                         type="file"
                                         ref={fileInputRef}
                                         className="hidden"
                                         accept={mediaType === 'video' ? "video/*" : "image/*"}
-                                        onChange={handleFileSelect}
+                                        multiple={mediaType === 'image'}
+                                        onChange={async (e) => {
+                                            const files = Array.from(e.target.files);
+                                            if (files.length === 0) return;
+
+                                            setUploading(true);
+                                            const newUrls = [...mediaUrls];
+
+                                            for (const file of files) {
+                                                if (mediaType === 'image' && newUrls.length >= 4) break;
+                                                if (mediaType === 'video' && newUrls.length >= 1) break;
+
+                                                const formData = new FormData();
+                                                formData.append("file", file);
+
+                                                try {
+                                                    const res = await fetch("http://localhost:5000/api/upload", {
+                                                        method: "POST",
+                                                        body: formData,
+                                                    });
+                                                    if (res.ok) {
+                                                        const data = await res.json();
+                                                        newUrls.push(data.url);
+                                                    }
+                                                } catch (err) {
+                                                    console.error("Upload error:", err);
+                                                }
+                                            }
+
+                                            setMediaUrls(newUrls);
+                                            setUploading(false);
+                                            if (fileInputRef.current) fileInputRef.current.value = "";
+                                        }}
                                     />
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
@@ -319,17 +368,31 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                     </button>
                                 </div>
 
-                                {mediaUrl && (
-                                    <div className="relative mt-2 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 bg-black/5 dark:bg-white/5 aspect-video flex items-center justify-center">
-                                        {mediaType === 'image' ? (
-                                            <img src={mediaUrl} alt="Preview" className="max-h-[300px] w-auto max-w-full object-contain" />
-                                        ) : mediaType === 'video' ? (
-                                            <video src={mediaUrl} controls className="max-h-[300px] w-full" />
-                                        ) : (
-                                            <span className="text-gray-400 text-sm">Preview not available</span>
-                                        )}
-                                    </div>
-                                )}
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                    {mediaUrls.map((url, idx) => (
+                                        <div key={idx} className="relative rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 bg-black/5 dark:bg-white/5 aspect-video flex items-center justify-center group">
+                                            {mediaType === 'image' ? (
+                                                <img src={url} alt="Preview" className="h-full w-full object-cover" />
+                                            ) : (
+                                                <video src={url} className="h-full w-full object-cover" />
+                                            )}
+                                            <button
+                                                onClick={() => setMediaUrls(prev => prev.filter((_, i) => i !== idx))}
+                                                className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <FaTimes size={10} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {mediaType === 'image' && mediaUrls.length < 4 && !uploading && (
+                                        <button
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-800 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors aspect-video"
+                                        >
+                                            <FaImage className="text-gray-400" size={24} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
@@ -429,7 +492,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                             </span>
                             <button
                                 onClick={handlePost}
-                                disabled={!content && !mediaUrl && !pollQuestion}
+                                disabled={!content && mediaUrls.length === 0 && !pollQuestion}
                                 className="px-6 py-2 bg-green-600 text-white rounded-full font-bold text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-green-200 dark:shadow-none"
                             >
                                 {loading ? "Posting..." : "Post"}

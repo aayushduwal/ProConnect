@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import api from "../../lib/api";
-import { FaUpload, FaTimes, FaUser, FaJava, FaVuejs, FaGithub } from "react-icons/fa";
+import { FaUpload, FaTimes, FaUser, FaJava, FaVuejs, FaGithub, FaCheck } from "react-icons/fa";
 import { FaTwitter, FaInstagram, FaFigma, FaProductHunt, FaBehance, FaTiktok, FaYoutube, FaMastodon, FaCode } from "react-icons/fa";
 import { SiWellfound, SiThreads, SiJavascript, SiTypescript, SiPython, SiReact, SiNextdotjs, SiNodedotjs, SiHtml5, SiCss3, SiDocker, SiAmazon, SiGo, SiRust, SiKotlin, SiSwift, SiFlutter, SiMongodb, SiPostgresql, SiTailwindcss, SiGit, SiMysql, SiFirebase, SiSupabase, SiGraphql, SiRedux, SiSvelte, SiAngular, SiCplusplus, SiDotnet, SiPhp, SiRuby, SiLaravel, SiSpring, SiDjango, SiFlask } from "react-icons/si";
 import { getSkillIcon, formatDisplayName as utilsFormatDisplayName } from "../../utils/skillUtils";
@@ -9,15 +9,18 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 
 export default function ProfileSettingsPage() {
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const fileInputRef = useRef(null);
+  const coverInputRef = useRef(null);
   const resumeInputRef = useRef(null);
 
   // Form States
   const [formData, setFormData] = useState({
+    username: "",
     firstName: "",
     lastName: "",
     bio: "",
@@ -41,6 +44,10 @@ export default function ProfileSettingsPage() {
       github: "" // Added GitHub initialization
     }
   });
+
+  // Username Check State
+  const [usernameAvailable, setUsernameAvailable] = useState(null); // null = unknown, true = available, false = taken
+  const [checkingUsername, setCheckingUsername] = useState(false);
 
   // Search States
   const [locationQuery, setLocationQuery] = useState("");
@@ -86,7 +93,9 @@ export default function ProfileSettingsPage() {
 
   // Derived state for display
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
 
   useEffect(() => {
     // Fetch user data
@@ -98,6 +107,7 @@ export default function ProfileSettingsPage() {
         const [first, ...rest] = (data.name || "").split(" ");
 
         setFormData({
+          username: data.username || "",
           firstName: data.firstName || first || "",
           lastName: data.lastName || rest.join(" ") || "",
           bio: data.bio || "",
@@ -125,6 +135,7 @@ export default function ProfileSettingsPage() {
           setFormData(prev => ({ ...prev, skills: data.skills }));
         }
         setAvatarUrl(data.avatarUrl || data.profilePicture || "");
+        setCoverUrl(data.coverUrl || "");
         setSaved(true);
       })
       .catch(err => console.error(err))
@@ -202,6 +213,28 @@ export default function ProfileSettingsPage() {
     return () => clearTimeout(delayDebounceFn);
   }, [skillQuery]);
 
+  // Username Availability Debounce
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      // Only check if length > 2 and it's different from current user's username
+      if (formData.username && formData.username.length > 2 && formData.username !== user?.username) {
+        setCheckingUsername(true);
+        try {
+          const res = await axios.get(`http://localhost:5000/api/users/check/${formData.username}`);
+          setUsernameAvailable(res.data.available);
+        } catch (error) {
+          console.error("Username check failed", error);
+        } finally {
+          setCheckingUsername(false);
+        }
+      } else {
+        setUsernameAvailable(null);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [formData.username, user]);
+
   const handleLocationChange = (e) => {
     setLocationQuery(e.target.value);
     // Don't set formData immediately if you want them to pick from list, 
@@ -275,6 +308,28 @@ export default function ProfileSettingsPage() {
     }
   };
 
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingCover(true);
+    const uploadData = new FormData();
+    uploadData.append("file", file);
+
+    try {
+      const res = await api.post("/upload", uploadData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      setCoverUrl(res.data.url);
+      setSaved(false);
+    } catch (err) {
+      console.error("Cover upload failed", err);
+      alert("Failed to upload cover image");
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
   const [uploadingResume, setUploadingResume] = useState(false);
 
   const handleResumeUpload = async (e) => {
@@ -319,7 +374,8 @@ export default function ProfileSettingsPage() {
       const payload = {
         ...formData,
         name: fullName,
-        avatarUrl
+        avatarUrl,
+        coverUrl
       };
 
       await api.put("/users/me", payload);
@@ -329,9 +385,17 @@ export default function ProfileSettingsPage() {
       localStorage.setItem("user", JSON.stringify({ ...currentUser, ...payload }));
 
       setSaved(true);
+      setTimeout(() => {
+        router.push("/scroll");
+      }, 1000);
     } catch (err) {
       console.error("Save failed", err);
-      alert("Failed to save profile");
+      // Show specific error from backend (e.g. "Username is already taken")
+      if (err.response && err.response.data && err.response.data.message) {
+        alert(err.response.data.message);
+      } else {
+        alert("Failed to save profile");
+      }
     } finally {
       setSaving(false);
     }
@@ -360,29 +424,88 @@ export default function ProfileSettingsPage() {
             <FaUser size={12} /> Basic Profile
           </h3>
 
-          <div className="flex items-start gap-6 mb-8">
-            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800">
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
-                    <FaUser size={24} />
-                  </div>
-                )}
-                {uploadingImage && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white">
-                    ...
-                  </div>
-                )}
+          <div className="flex flex-col gap-6 mb-8">
+            {/* Cover Upload */}
+            <div className="relative group cursor-pointer w-full h-32 md:h-40 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800" onClick={() => coverInputRef.current?.click()}>
+              {coverUrl ? (
+                <img src={coverUrl} alt="Cover" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 bg-gradient-to-r from-green-400/10 via-blue-500/5 to-purple-600/10">
+                  <FaUpload size={20} />
+                  <span className="text-xs mt-2 font-bold">Upload Cover Banner</span>
+                </div>
+              )}
+              {uploadingCover && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                </div>
+              )}
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="bg-black/50 text-white text-[10px] px-2 py-1 rounded-md backdrop-blur-sm font-bold">
+                  Change Banner
+                </div>
               </div>
-              <div className="mt-2 text-sm font-bold text-green-600 dark:text-green-500 group-hover:underline">Upload new</div>
-              <div className="text-xs text-gray-400 dark:text-gray-500">Recommended size: 400x400px</div>
             </div>
-            <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={handleImageUpload} />
+            <input type="file" ref={coverInputRef} hidden accept="image/*" onChange={handleCoverUpload} />
+
+            <div className="flex items-start gap-6">
+              <div className="relative group cursor-pointer -mt-12 ml-4 md:ml-8" onClick={() => fileInputRef.current?.click()}>
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 border-4 border-white dark:border-black shadow-lg">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
+                      <FaUser size={32} />
+                    </div>
+                  )}
+                  {uploadingImage && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-2 text-center">
+                  <div className="text-sm font-bold text-green-600 dark:text-green-500 group-hover:underline">Update Picture</div>
+                </div>
+              </div>
+              <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={handleImageUpload} />
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="md:col-span-2">
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Username <span className="text-red-500">*</span></label>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-gray-400 text-sm">@</span>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={(e) => {
+                    // Only allow lowercase a-z, 0-9, underscores, and dots
+                    const val = e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, '');
+                    setFormData(prev => ({ ...prev, username: val }));
+                    setSaved(false);
+                  }}
+                  className={`w-full border ${usernameAvailable === false ? 'border-red-500 focus:border-red-500' : usernameAvailable === true ? 'border-green-500 focus:border-green-500' : 'border-gray-300 dark:border-gray-800'} bg-white dark:bg-white/5 rounded-lg pl-8 pr-10 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-0 outline-none transition-colors`}
+                  placeholder="username"
+                />
+                <div className="absolute right-3 top-2.5">
+                  {checkingUsername ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
+                  ) : usernameAvailable === true ? (
+                    <FaCheck className="text-green-500" size={14} />
+                  ) : usernameAvailable === false ? (
+                    <FaTimes className="text-red-500" size={14} />
+                  ) : null}
+                </div>
+              </div>
+              {usernameAvailable === false && (
+                <p className="text-xs text-red-500 mt-1">That username is already taken.</p>
+              )}
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Your public profile URL: localhost:3000/u/{formData.username || 'username'}</p>
+            </div>
+
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">First name <span className="text-red-500">*</span></label>
               <input

@@ -36,7 +36,7 @@ export default function LaunchpadPage() {
             <div className="sticky top-0 bg-[#FAFAFA]/95 dark:bg-black/95 backdrop-blur-md z-30 border-b border-gray-200/50 dark:border-gray-800/50 h-16 flex items-center transition-colors">
                 <div className="max-w-3xl mx-auto w-full px-4 md:px-8 flex justify-between items-center">
                     <h1 className="font-bold text-gray-900 dark:text-white text-xl tracking-tight flex items-center gap-2">
-                        <FaRocket className="text-orange-500" size={18} />
+                        <FaRocket className="text-green-600" size={18} />
                         Launchpad
                     </h1>
                     <button

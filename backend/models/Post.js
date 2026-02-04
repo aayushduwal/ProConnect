@@ -31,6 +31,7 @@ const postSchema = new mongoose.Schema(
             type: String,
             default: ""
         },
+        mediaUrls: [{ type: String }], // Array for multiple images (up to 4)
         skills: [{ type: String, trim: true }],
         technologies: [{ type: String, trim: true }],
         category: { type: String, trim: true, default: "General" },
