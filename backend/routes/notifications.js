@@ -8,6 +8,7 @@ router.get("/", authMiddleware, async (req, res) => {
     try {
         const notifications = await Notification.find({ recipient: req.user.id })
             .populate("sender", "name username avatarUrl profilePicture")
+            .populate("post", "content")
             .sort({ createdAt: -1 })
             .limit(20);
 

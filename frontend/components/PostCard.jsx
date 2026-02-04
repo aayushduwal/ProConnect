@@ -12,6 +12,7 @@ import {
   FaFlag,
   FaBookmark,
   FaRegBookmark,
+  FaTimes
 } from "react-icons/fa";
 import { getUser } from "../utils/auth";
 import CommentSection from "./CommentSection";
@@ -32,6 +33,12 @@ export default function PostCard({ post }) {
   const [showMenu, setShowMenu] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+
+  const MAX_CHAR_LIMIT = 280;
+  const isContentLong = post.content?.length > MAX_CHAR_LIMIT;
+  const displayedContent = isExpanded ? post.content : post.content?.slice(0, MAX_CHAR_LIMIT) + (isContentLong ? "..." : "");
 
   const handleLike = async () => {
     if (!user || !userId) return alert("Please log in to like.");
@@ -217,29 +224,54 @@ export default function PostCard({ post }) {
           <h2 className="font-bold text-lg mb-2 text-gray-900 dark:text-white transition-colors">{post.title}</h2>
         )}
         <p className="text-[15px] text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed transition-colors">
-          {post.content}
+          {displayedContent}
+          {isContentLong && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="ml-1 text-green-600 dark:text-green-400 font-semibold hover:underline"
+            >
+              {isExpanded ? "Read Less" : "Read More"}
+            </button>
+          )}
         </p>
       </div>
 
       {/* Post Media */}
-      {post.mediaUrl && post.mediaUrl !== "none" && (
-        <div className="mt-3 relative w-full bg-gray-50 dark:bg-black/20 border-t border-b border-gray-100 dark:border-gray-800">
+      {(post.mediaUrls?.length > 0 || (post.mediaUrl && post.mediaUrl !== "none")) && (
+        <div className="mt-3 px-4 relative w-full">
           {post.mediaType === "video" ? (
-            <video
-              src={post.mediaUrl}
-              controls
-              controlsList="nodownload"
-              className="w-full max-h-[500px] object-contain"
-            />
-          ) : (
-            <div className="relative w-full h-[300px] sm:h-[400px]">
-              <Image
-                src={post.mediaUrl}
-                alt="Post content"
-                fill
-                className="object-contain"
-                unoptimized
+            <div className="rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-black/20">
+              <video
+                src={post.mediaUrls?.[0] || post.mediaUrl}
+                controls
+                controlsList="nodownload"
+                className="w-full max-h-[500px] object-contain"
               />
+            </div>
+          ) : (
+            <div className={`grid gap-2 ${(post.mediaUrls?.length || 1) === 1 ? "grid-cols-1" :
+              (post.mediaUrls?.length) === 2 ? "grid-cols-2" :
+                (post.mediaUrls?.length) >= 3 ? "grid-cols-2" : ""
+              }`}>
+              {(post.mediaUrls?.length > 0 ? post.mediaUrls : [post.mediaUrl]).map((url, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => setSelectedImageIndex(idx)}
+                  className={`relative w-full cursor-zoom-in rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 group ${(post.mediaUrls?.length || 1) === 1 ? "h-[300px] sm:h-[400px]" :
+                    (post.mediaUrls?.length) === 2 ? "h-[200px] sm:h-[300px]" :
+                      (post.mediaUrls?.length) === 3 && idx === 0 ? "h-[400px] row-span-2" :
+                        "h-[200px]"
+                    }`}
+                >
+                  <Image
+                    src={url}
+                    alt={`Post content ${idx + 1}`}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    unoptimized
+                  />
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -316,6 +348,53 @@ export default function PostCard({ post }) {
         onSubmit={handleReport}
         postId={post._id}
       />
+      {/* Lightbox Overlay */}
+      {selectedImageIndex !== null && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setSelectedImageIndex(null)}
+        >
+          <button
+            className="absolute top-6 right-6 text-white hover:text-gray-300 transition-colors z-[110]"
+            onClick={() => setSelectedImageIndex(null)}
+          >
+            <FaTimes size={28} />
+            <span className="sr-only">Close</span>
+          </button>
+
+          {/* Navigation */}
+          {post.mediaUrls?.length > 1 && (
+            <>
+              <button
+                className="absolute left-6 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-[110] p-2 bg-white/10 rounded-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImageIndex(prev => (prev === 0 ? post.mediaUrls.length - 1 : prev - 1));
+                }}
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              </button>
+              <button
+                className="absolute right-6 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-[110] p-2 bg-white/10 rounded-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImageIndex(prev => (prev === post.mediaUrls.length - 1 ? 0 : prev + 1));
+                }}
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              </button>
+            </>
+          )}
+
+          <div className="relative w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={(post.mediaUrls?.length > 0 ? post.mediaUrls : [post.mediaUrl])[selectedImageIndex]}
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
+              alt="Fullscreen"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

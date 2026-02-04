@@ -10,6 +10,7 @@ import { FaTwitter, FaInstagram, FaLinkedin, FaGlobe } from "react-icons/fa";
 import NetworkModal from "../../../components/NetworkModal";
 import { getSkillIcon, formatDisplayName } from "../../../utils/skillUtils";
 import PostCard from "../../../components/PostCard";
+import ArticleCard from "../../../components/ArticleCard";
 
 // Social Icon Helper
 const getSocialIcon = (platform) => {
@@ -93,6 +94,11 @@ export default function PublicProfile() {
     const [userPosts, setUserPosts] = useState([]);
     const [postsLoading, setPostsLoading] = useState(false);
 
+    // Articles State
+    const [userArticles, setUserArticles] = useState([]);
+    const [savedArticles, setSavedArticles] = useState([]);
+    const [articlesLoading, setArticlesLoading] = useState(false);
+
     useEffect(() => {
         const loggedInUser = getUser();
         setCurrentUser(loggedInUser);
@@ -124,9 +130,9 @@ export default function PublicProfile() {
             .finally(() => setLoading(false));
     }, [username]);
 
-    // Fetch posts when tab changes to 'posts'
+    // Fetch data when tab changes
     useEffect(() => {
-        if (activeTab === 'posts' && user && user._id) {
+        if (activeTab === 'posts' && user?._id) {
             setPostsLoading(true);
             fetch(`http://localhost:5000/api/posts/user/${user._id}`)
                 .then(res => res.json())
@@ -135,6 +141,29 @@ export default function PublicProfile() {
                 })
                 .catch(err => console.error("Failed to fetch user posts", err))
                 .finally(() => setPostsLoading(false));
+        } else if (activeTab === 'articles' && user?._id) {
+            setArticlesLoading(true);
+            fetch(`http://localhost:5000/api/articles`) // We'll filter on frontend or add backend route if needed
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        setUserArticles(data.filter(a => a.author?._id === user._id || a.author?.id === user._id));
+                    }
+                })
+                .catch(err => console.error("Failed to fetch user articles", err))
+                .finally(() => setArticlesLoading(false));
+        } else if (activeTab === 'saved' && isMe) {
+            setArticlesLoading(true);
+            const token = getToken();
+            fetch(`http://localhost:5000/api/articles/me/saved`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) setSavedArticles(data);
+                })
+                .catch(err => console.error("Failed to fetch saved articles", err))
+                .finally(() => setArticlesLoading(false));
         }
     }, [activeTab, user]);
 
@@ -205,13 +234,26 @@ export default function PublicProfile() {
         <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors">
             <Header />
 
-            <main className="flex-1 flex flex-col items-center px-4 pt-24 pb-8">
-                <div className="w-full max-w-4xl">
+            <main className="flex-1 flex flex-col items-center pb-8">
+                {/* Cover Area */}
+                <div className="w-full h-48 md:h-64 relative transition-colors">
+                    {user.coverUrl ? (
+                        <img
+                            src={user.coverUrl}
+                            alt="Cover"
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-r from-green-400/20 via-blue-500/10 to-purple-600/20 dark:from-green-500/10 dark:via-blue-500/5 dark:to-purple-600/10 transition-colors"></div>
+                    )}
+                </div>
 
-                    {/* Top Section: Avatar & Basic Info */}
-                    <div className="flex flex-col items-center text-center mb-8">
-                        <div className="relative mb-4">
-                            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white dark:border-gray-900 shadow-md">
+                <div className="w-full max-w-4xl px-4">
+                    {/* Identity Section */}
+                    <div className="relative -mt-16 md:-mt-20 mb-8 flex flex-col items-center sm:items-start sm:flex-row sm:gap-6 text-center sm:text-left">
+                        {/* Avatar */}
+                        <div className="relative mb-4 sm:mb-0">
+                            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white dark:border-[#0A0A0A] shadow-xl bg-white dark:bg-[#111]">
                                 <img
                                     src={
                                         (user.profilePicture && user.profilePicture.length > 0 ? user.profilePicture : null) ||
@@ -222,88 +264,109 @@ export default function PublicProfile() {
                                     className="w-full h-full object-cover"
                                 />
                             </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 mb-1">
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{user.name}</h1>
-                            {user.verified && <FaCheck className="text-green-500 text-sm" title="Verified" />}
-                        </div>
-
-                        {user.bio && (
-                            <p className="text-gray-600 dark:text-gray-400 max-w-lg mb-3 leading-relaxed">
-                                {user.bio}
-                            </p>
-                        )}
-
-                        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-6">
-                            {user.location && (
-                                <div className="flex items-center gap-1">
-                                    <FiMapPin />
-                                    <span>{user.location}</span>
+                            {user.verified && (
+                                <div className="absolute bottom-2 right-2 bg-white dark:bg-black rounded-full p-1 shadow-sm">
+                                    <FaCheck className="text-green-500 text-sm" title="Verified" />
                                 </div>
                             )}
-                            <div className="flex items-center gap-1">
-                                <FiCalendar />
-                                <span>Joined {new Date(user.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
-                            </div>
-                            {user.website && (
-                                <a
-                                    href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-1 hover:text-green-600 transition-colors"
-                                >
-                                    <FaLink />
-                                    <span>Website</span>
-                                </a>
-                            )}
                         </div>
 
-                        {/* Skills Row */}
-                        {user.skills && user.skills.length > 0 && (
-                            <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-2xl">
-                                {user.skills.map((skill, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-gray-800 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-default"
-                                    >
-                                        <span className="opacity-80 scale-90">{getSkillIcon(skill)}</span>
-                                        <span>{formatDisplayName(skill)}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                        {/* Name & Title */}
+                        <div className="flex-1 sm:pt-20">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight mb-1">
+                                        {user.name}
+                                    </h1>
+                                    <p className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-4 max-w-2xl leading-relaxed">
+                                        {user.bio || "Crafting something amazing..."}
+                                    </p>
+                                </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex gap-3 mb-8">
-                            {!isMe && currentUser && (
-                                <button
-                                    onClick={handleFollowToggle}
-                                    disabled={followLoading}
-                                    className={`px-6 py-2 rounded-full font-bold text-sm transition-all shadow-sm flex items-center gap-2 ${isFollowing
-                                        ? "bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
-                                        : "bg-green-600 text-white hover:bg-green-700 border border-transparent"
-                                        }`}
-                                >
-                                    {isFollowing ? "Following" : "Follow"}
-                                </button>
-                            )}
-                            <div className="flex gap-4 items-center px-4">
+                                {/* Action Buttons */}
+                                <div className="flex gap-2 justify-center sm:justify-end">
+                                    {!isMe && currentUser && (
+                                        <button
+                                            onClick={handleFollowToggle}
+                                            disabled={followLoading}
+                                            className={`px-6 py-2 rounded-full font-bold text-sm transition-all shadow-sm flex items-center gap-2 ${isFollowing
+                                                ? "bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5"
+                                                : "bg-green-600 text-white hover:bg-green-700 border border-transparent"
+                                                }`}
+                                        >
+                                            {isFollowing ? "Following" : "Follow"}
+                                        </button>
+                                    )}
+                                    {isMe && (
+                                        <button
+                                            onClick={() => window.location.href = '/profile'}
+                                            className="px-6 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white rounded-full font-bold text-sm transition-all border border-gray-200 dark:border-gray-800"
+                                        >
+                                            Edit Profile
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Metadata Badges */}
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-6">
                                 <button
                                     onClick={() => openNetworkModal("followers")}
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
+                                    className="flex items-center gap-1.5 text-sm group"
                                 >
-                                    <span className="font-bold text-gray-900 dark:text-gray-100">{user.followers?.length || 0}</span> followers
+                                    <span className="font-black text-gray-900 dark:text-white group-hover:text-green-600 transition-colors">{user.followers?.length || 0}</span>
+                                    <span className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors lowercase font-medium">followers</span>
                                 </button>
                                 <button
                                     onClick={() => openNetworkModal("following")}
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
+                                    className="flex items-center gap-1.5 text-sm group"
                                 >
-                                    <span className="font-bold text-gray-900 dark:text-gray-100">{user.following?.length || 0}</span> following
+                                    <span className="font-black text-gray-900 dark:text-white group-hover:text-green-600 transition-colors">{user.following?.length || 0}</span>
+                                    <span className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors lowercase font-medium">following</span>
                                 </button>
+
+                                <div className="h-4 w-px bg-gray-200 dark:bg-gray-800 mx-2 hidden sm:block"></div>
+
+                                {user.location && (
+                                    <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 max-w-xs" title={user.location}>
+                                        <FiMapPin className="flex-shrink-0" />
+                                        <span className="truncate">{user.location.split(',')[0]}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                                    <FiCalendar className="flex-shrink-0" />
+                                    <span>Joined {new Date(user.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
+                                </div>
+                                {user.website && (
+                                    <a
+                                        href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-500 font-bold hover:underline"
+                                    >
+                                        <FaLink className="flex-shrink-0" />
+                                        <span>Website</span>
+                                    </a>
+                                )}
                             </div>
                         </div>
                     </div>
+
+                    {/* Skills Row */}
+                    {user.skills && user.skills.length > 0 && (
+                        <div className="flex flex-wrap justify-center sm:justify-start gap-2 mb-10 overflow-x-auto no-scrollbar">
+                            {user.skills.map((skill, idx) => (
+                                <div
+                                    key={idx}
+                                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#111] border border-gray-100 dark:border-gray-800 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm hover:border-green-500 dark:hover:border-green-500/50 transition-all cursor-default whitespace-nowrap"
+                                >
+                                    <span className="grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all">{getSkillIcon(skill)}</span>
+                                    <span>{formatDisplayName(skill)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
 
                     {/* Tabs */}
                     <div className="border-b border-gray-200 dark:border-gray-800 mb-6 transition-colors">
@@ -326,6 +389,20 @@ export default function PublicProfile() {
                             >
                                 POSTS
                             </button>
+                            <button
+                                className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'articles' ? 'border-green-500 text-green-600 dark:text-green-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+                                onClick={() => setActiveTab('articles')}
+                            >
+                                ARTICLES
+                            </button>
+                            {isMe && (
+                                <button
+                                    className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'saved' ? 'border-green-500 text-green-600 dark:text-green-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+                                    onClick={() => setActiveTab('saved')}
+                                >
+                                    SAVED
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -342,6 +419,36 @@ export default function PublicProfile() {
                                 ) : (
                                     <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-gray-800 border-dashed">
                                         <p className="text-gray-400">No posts yet.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {activeTab === 'articles' && (
+                            <div className="flex flex-col gap-4">
+                                {articlesLoading ? (
+                                    <div className="text-center py-8 text-gray-400 italic">Loading articles...</div>
+                                ) : userArticles.length > 0 ? (
+                                    userArticles.map(article => (
+                                        <ArticleCard key={article._id} article={article} />
+                                    ))
+                                ) : (
+                                    <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-gray-800 border-dashed">
+                                        <p className="text-gray-400">No articles published yet.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {activeTab === 'saved' && isMe && (
+                            <div className="flex flex-col gap-4">
+                                {articlesLoading ? (
+                                    <div className="text-center py-8 text-gray-400 italic">Loading saved items...</div>
+                                ) : savedArticles.length > 0 ? (
+                                    savedArticles.map(article => (
+                                        <ArticleCard key={article._id} article={article} />
+                                    ))
+                                ) : (
+                                    <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-gray-800 border-dashed">
+                                        <p className="text-gray-400">You haven't saved any articles yet.</p>
                                     </div>
                                 )}
                             </div>
@@ -498,7 +605,6 @@ export default function PublicProfile() {
                             })}
                         </div>
                     </div>
-
                 </div>
             </main>
 

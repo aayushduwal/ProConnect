@@ -157,7 +157,7 @@ router.post("/unfollow/:id", authMiddleware, async (req, res) => {
 router.put("/me", authMiddleware, async (req, res) => {
   try {
     const allowedUpdates = [
-      "name", "firstName", "lastName", "bio", "avatarUrl", "linkedinUrl",
+      "name", "firstName", "lastName", "username", "bio", "avatarUrl", "coverUrl", "linkedinUrl",
       "location", "pronouns", "website", "calendarLink", "socialLinks",
       "skills", "interests", "projects", "resumeUrl"
     ];
@@ -166,6 +166,14 @@ router.put("/me", authMiddleware, async (req, res) => {
     allowedUpdates.forEach(field => {
       if (req.body[field] !== undefined) updates[field] = req.body[field];
     });
+
+    // Check for username uniqueness if being updated
+    if (updates.username) {
+      const existingUser = await User.findOne({ username: updates.username });
+      if (existingUser && existingUser._id.toString() !== req.user.id) {
+        return res.status(400).json({ message: "Username is already taken" });
+      }
+    }
 
     const updated = await User.findByIdAndUpdate(req.user.id, updates, {
       new: true,
@@ -178,6 +186,7 @@ router.put("/me", authMiddleware, async (req, res) => {
       email: updated.email,
       verified: updated.verified,
       avatarUrl: updated.avatarUrl,
+      coverUrl: updated.coverUrl,
       bio: updated.bio,
       linkedinUrl: updated.linkedinUrl,
       skills: updated.skills,

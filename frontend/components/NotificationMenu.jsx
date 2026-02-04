@@ -4,8 +4,10 @@ import Image from "next/image";
 import { FaTimes, FaUserPlus, FaCheck } from "react-icons/fa";
 import api from "../lib/api";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function NotificationMenu({ onClose }) {
+    const router = useRouter();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [followLoading, setFollowLoading] = useState({}); // { [userId]: boolean }
@@ -132,7 +134,15 @@ export default function NotificationMenu({ onClose }) {
                             return (
                                 <div
                                     key={notif._id}
-                                    className={`p-4 hover:bg-gray-50 transition-colors flex gap-3 ${!notif.read ? 'bg-blue-50/30' : ''}`}
+                                    onClick={() => {
+                                        onClose();
+                                        if (notif.type === 'follow') {
+                                            router.push(`/u/${notif.sender?.username}`);
+                                        } else if (notif.post) {
+                                            router.push(`/post/${notif.post._id || notif.post}`);
+                                        }
+                                    }}
+                                    className={`p-4 hover:bg-gray-50 transition-colors flex gap-3 cursor-pointer ${!notif.read ? 'bg-blue-50/30' : ''}`}
                                 >
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
                                         <img
@@ -148,7 +158,11 @@ export default function NotificationMenu({ onClose }) {
 
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm text-gray-900">
-                                            <Link href={`/u/${notif.sender?.username}`} className="font-bold hover:underline">
+                                            <Link
+                                                href={`/u/${notif.sender?.username}`}
+                                                className="font-bold hover:underline"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
                                                 {notif.sender?.name}
                                             </Link>
                                             <span className="text-gray-500">
@@ -158,8 +172,14 @@ export default function NotificationMenu({ onClose }) {
                                                 {notif.type === 'reply' && " replied to your comment."}
                                             </span>
                                         </p>
-                                        <p className="text-xs text-gray-400 mt-1">
-                                            {new Date(notif.createdAt).toLocaleDateString()}
+
+                                        <p className="text-[10px] text-gray-400 mt-1">
+                                            {new Date(notif.createdAt).toLocaleDateString(undefined, {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
                                         </p>
 
                                         {/* Follow Action Button */}
