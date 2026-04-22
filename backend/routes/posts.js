@@ -118,7 +118,13 @@ router.get("/", async (req, res) => {
         });
 
         // --- 3. SORT & RETURN ---
-        scoredPosts.sort((a, b) => b.score - a.score);
+        scoredPosts.sort((a, b) => {
+            // Tie-breaker: If scores are virtually identical, sort by newest
+            if (Math.abs(b.score - a.score) < 0.0001) {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            }
+            return b.score - a.score;
+        });
 
         res.json(scoredPosts);
     } catch (err) {
@@ -204,17 +210,14 @@ router.post("/", verifyToken, async (req, res) => {
     try {
         const { content, title, image, mediaType, mediaUrl, mediaUrls, skills, technologies, category, poll } = req.body;
 
-        // Check if banned
         if (req.user.status === "banned") {
             return res.status(403).json({ error: "Your account has been suspended for violating community guidelines." });
         }
 
-        // Validate - either content or poll must be present
         if (!content && !poll?.question) {
             return res.status(400).json({ error: "Content or poll is required" });
         }
 
-        // Validate media limits
         if (mediaType === 'video' && mediaUrls && mediaUrls.length > 1) {
             return res.status(400).json({ error: "Only one video is allowed per post." });
         }
@@ -238,6 +241,32 @@ router.post("/", verifyToken, async (req, res) => {
                 options: poll.options.map(opt => ({ text: opt, voters: [] }))
             } : undefined
         });
+
+        // Check for GitHub link to embed
+        const githubRegex = /https:\/\/github\.com\/([a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+)/;
+        const match = content.match(githubRegex);
+        if (match && match[1]) {
+            try {
+                const repoPath = match[1];
+                const response = await fetch(`https://api.github.com/repos/${repoPath}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    newPost.githubEmbed = {
+                        repoName: data.full_name,
+                        description: data.description || "",
+                        stars: data.stargazers_count || 0,
+                        forks: data.forks_count || 0,
+                        language: data.language || "",
+                        url: data.html_url
+                    };
+                    // Strip the URL from content so it doesn't show twice
+                    newPost.content = newPost.content.replace(githubRegex, "").trim();
+                }
+            } catch (githubErr) {
+                console.error("Failed to fetch GitHub repo data:", githubErr);
+                // Fail silently, we just won't have the embed
+            }
+        }
 
         const savedPost = await newPost.save();
         // Populate author immediately for frontend return

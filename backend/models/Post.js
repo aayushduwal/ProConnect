@@ -90,6 +90,14 @@ const postSchema = new mongoose.Schema(
                 createdAt: { type: Date, default: Date.now }
             }
         ],
+        githubEmbed: {
+            repoName: String,
+            description: String,
+            stars: Number,
+            forks: Number,
+            language: String,
+            url: String
+        },
     },
     { timestamps: true }
 );

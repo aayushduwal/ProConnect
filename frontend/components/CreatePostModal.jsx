@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { FaTimes, FaGlobeAmericas, FaImage, FaVideo, FaPoll, FaBook, FaSmile, FaHistory, FaTrash, FaUpload } from "react-icons/fa";
+import { FaTimes, FaGlobeAmericas, FaImage, FaVideo, FaPoll, FaBook, FaSmile, FaHistory, FaTrash, FaUpload, FaHashtag } from "react-icons/fa";
 import dynamic from "next/dynamic";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
@@ -26,6 +26,9 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
     // Category State
     const [category, setCategory] = useState("General");
     const categories = ["General", "Technology", "Design", "Marketing", "Business", "Development", "Education", "Health"];
+
+    // Technologies/Tags State
+    const [technologies, setTechnologies] = useState("");
 
     // Emoji Picker State
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -171,7 +174,8 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                 content,
                 mediaUrls,
                 mediaType: mediaUrls.length > 0 ? mediaType : 'none',
-                category
+                category,
+                technologies: technologies.split(",").map(t => t.trim().replace(/^#/, '')).filter(Boolean)
             };
 
             // Add poll if present
@@ -210,6 +214,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
         } finally {
             setLoading(false);
             setContent("");
+            setTechnologies("");
             setMediaUrls([]);
             setPollQuestion("");
             setPollOptions(["", ""]);
@@ -279,6 +284,20 @@ export default function CreatePostModal({ isOpen, onClose, user, onPostCreated, 
                                 placeholder={placeholders[placeholderIndex]}
                                 className="w-full text-lg text-gray-900 dark:text-white resize-none outline-none min-h-[100px] placeholder-gray-400 dark:placeholder-gray-600 mt-2 bg-transparent"
                             />
+
+                            {/* Tech Stack / Tags Input */}
+                            <div className="flex items-center mt-2 group border-t border-gray-100 dark:border-gray-800 pt-3">
+                                <span className="bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 p-1.5 rounded-md mr-3">
+                                    <FaHashtag size={12} />
+                                </span>
+                                <input
+                                    type="text"
+                                    value={technologies}
+                                    onChange={(e) => setTechnologies(e.target.value)}
+                                    placeholder="Add tech stack or tags (e.g. React, Node.js)"
+                                    className="w-full text-sm font-medium text-gray-700 dark:text-gray-300 bg-transparent outline-none placeholder-gray-400 dark:placeholder-gray-600"
+                                />
+                            </div>
                         </div>
                     </div>
 
