@@ -17,12 +17,12 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 // ---------------------------
 router.post("/register", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, name } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !name) {
       return res
         .status(400)
-        .json({ message: "Email and password are required" });
+        .json({ message: "Name, email, and password are required" });
     }
 
     // Email Validation
@@ -43,7 +43,7 @@ router.post("/register", async (req, res) => {
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: "User already exists" });
+      return res.status(409).json({ message: "This email is already registered. Please log in instead." });
     }
 
     // Hash password
@@ -53,11 +53,11 @@ router.post("/register", async (req, res) => {
     // Auto-verify if email is from a .edu.np domain
     const isEduEmail = email.endsWith(".edu.np");
 
-    // Create user with empty name & username
+    // Create user with provided name
     const user = new User({
       email,
       password: hashedPassword,
-      name: "",
+      name: name.trim(), // Use provided name
       username: `user_${Date.now()}`,
       verified: isEduEmail, // Set based on domain
     });

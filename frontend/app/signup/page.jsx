@@ -11,6 +11,7 @@ import { auth, googleProvider } from "../../utils/firebase";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
   });
@@ -109,7 +110,24 @@ export default function Signup() {
             <div className="flex-grow h-px bg-gray-200 dark:bg-gray-800"></div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Full Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                placeholder="John Doe"
+                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+                autoFocus
+                autoComplete="off"
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email
@@ -122,6 +140,7 @@ export default function Signup() {
                 required
                 placeholder="you@youremail.com"
                 className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+                autoComplete="off"
               />
             </div>
 
@@ -138,6 +157,7 @@ export default function Signup() {
                   required
                   placeholder="At least 8 characters."
                   className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 pr-10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"
@@ -165,7 +185,9 @@ export default function Signup() {
           </form>
 
           {message && (
-            <p className="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">{message}</p>
+            <p className={`mt-3 text-center text-sm ${message.includes("✅") ? "text-green-600" : "text-red-500 font-medium"}`}>
+              {message}
+            </p>
           )}
         </div>
 

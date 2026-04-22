@@ -236,6 +236,46 @@ export default function PostCard({ post }) {
         </p>
       </div>
 
+      {/* GitHub Embed */}
+      {post.githubEmbed && post.githubEmbed.repoName && (
+        <div className="px-4 mt-2 mb-3">
+          <a
+            href={post.githubEmbed.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block border border-gray-200 dark:border-gray-800 rounded-xl p-4 bg-gray-50/50 dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors group"
+          >
+            <div className="flex items-start gap-3">
+              <svg className="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd"></path></svg>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-[15px] text-blue-600 dark:text-blue-400 group-hover:underline truncate">
+                  {post.githubEmbed.repoName}
+                </h4>
+                <p className="text-[13px] text-gray-600 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                  {post.githubEmbed.description || "No description provided."}
+                </p>
+                <div className="flex items-center gap-4 mt-3 text-xs font-medium text-gray-500 dark:text-gray-400">
+                  {post.githubEmbed.language && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+                      {post.githubEmbed.language}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path></svg>
+                    {post.githubEmbed.stars?.toLocaleString()}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 16 16"><path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"></path></svg>
+                    {post.githubEmbed.forks?.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      )}
+
       {/* Post Media */}
       {(post.mediaUrls?.length > 0 || (post.mediaUrl && post.mediaUrl !== "none")) && (
         <div className="mt-3 px-4 relative w-full">
